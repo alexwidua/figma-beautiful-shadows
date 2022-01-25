@@ -1,0 +1,13 @@
+.container {
+	position: relative;
+	overflow: hidden;
+	width: 100%;
+	height: calc(100% - 4rem);
+	background: #eee;
+}
+
+.menu {
+	position: absolute;
+	bottom: 1rem;
+	left: 1rem;
+}

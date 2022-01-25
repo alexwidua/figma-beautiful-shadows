@@ -1,0 +1,25 @@
+.target {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 100px;
+	height: 100px;
+	border: 1px solid var(--color-blue);
+	background: #fff;
+	border-radius: 16px;
+	cursor: ns-resize;
+	transform: translate3d(-50%, -50%, 0);
+}
+
+.badge {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	padding: 1px 6px;
+	background: var(--color-blue);
+	border-radius: 3px;
+	box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.4);
+	color: #fff;
+	font-size: 10px;
+	transform: translate3d(-50%, 76px, 0);
+}

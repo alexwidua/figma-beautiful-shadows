@@ -1,0 +1,56 @@
+.line {
+	position: absolute;
+	display: block;
+	background: var(--color-red);
+	pointer-events: none;
+
+	--line-width: 1px;
+	--icon-size: 6px;
+}
+
+.x {
+	left: 50%;
+	width: var(--line-width);
+	height: 100%;
+	transform: translateX(-50%);
+}
+
+.y {
+	top: 50%;
+	width: 100%;
+	height: var(--line-width);
+	transform: translateY(-50%);
+}
+
+.x::before,
+.x::after,
+.y::before,
+.y::after {
+	position: absolute;
+	width: var(--icon-size);
+	height: var(--icon-size);
+	background-image: url("data:image/svg+xml,%3Csvg width='100%' height='100%' viewBox='0 0 8 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1C1.69785 1.69785 2.84781 2.84781 4 4M7 7C6.2921 6.2921 5.14495 5.14495 4 4M4 4L7 1M4 4L1 7' stroke='%23f24822' stroke-width='1'/%3E%3C/svg%3E%0A");
+	content: ' ';
+}
+
+.x::before {
+	top: 0;
+	left: 50%;
+	transform: translate3d(-50%, -50%, 0);
+}
+.x::after {
+	bottom: 0;
+	left: 50%;
+	transform: translate3d(-50%, 50%, 0);
+}
+
+.y::before {
+	top: 50%;
+	left: 0;
+	transform: translate3d(-50%, -50%, 0);
+}
+.y::after {
+	top: 50%;
+	right: 0;
+	transform: translate3d(50%, -50%, 0);
+}
