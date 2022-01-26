@@ -11,6 +11,10 @@ import { emit } from '@create-figma-plugin/utilities'
 import Preview from './ui/Preview/preview'
 
 const Plugin = () => {
+	/**
+	 * Add resizeable plugin window
+	 * Thank you for this easy drop-in solution @YuanQingLim, you're amazing!
+	 */
 	function onWindowResize(windowSize: { width: number; height: number }) {
 		emit('RESIZE_WINDOW', windowSize)
 	}
@@ -22,7 +26,7 @@ const Plugin = () => {
 	})
 
 	return (
-		<div style={{ background: '#eee' }}>
+		<div>
 			<Preview />
 			<VerticalSpace space={'small'} />
 			<Container>

@@ -1,38 +1,56 @@
 import { h, Fragment } from 'preact'
-import { useState } from 'preact/hooks'
-import { normalize } from '../../../../utils/math'
+import { useState, useMemo, useEffect } from 'preact/hooks'
+import { stepped, normalize } from '../../../../utils/math'
 import { useDrag } from '@use-gesture/react'
 import { useSpring, animated, to } from '@react-spring/web'
 import chroma from 'chroma-js'
 import { getCastedShadows } from '../../../../utils/shadow'
 import styles from './target.css'
-import useDebounce from '../../../../hooks/useDebounce'
+import { throttle } from '../../../../utils/throttle'
+import { THROTTLE_SCENE_UPDATES } from '../../preview'
+
+export interface TargetValues {
+	x: number
+	y: number
+	elevation: number
+}
 
 interface TargetProps {
+	preview: any
+	scene: any
+	elevation: number
 	dragRange: number
 	initElevation: number
 	minElevation: number
-	light: any
-	style?: any
-	onVerticalDrag: Function
+	onTargetChange: Function
 }
 
 const Target = ({
+	preview,
+	scene,
+	elevation,
 	dragRange = 50,
 	initElevation = 0.5,
 	minElevation = 0.025,
-	light,
-	style,
-	onVerticalDrag,
+	onTargetChange,
 	...rest
 }: TargetProps) => {
-	const [showElevationBadge, setShowElevationBadge] = useState(false)
-	const [elevation, setElevation] = useState(initElevation)
-	const [{ scale }, api] = useSpring(() => ({ scale: 1 }))
+	const [elevationBadge, setElevationBadge] = useState({
+		value: 0,
+		visible: false
+	})
+	const { vw, vh } = preview
 
+	/**
+	 * Handle animation and drag logic.
+	 * We assume that the target element is always centered
+	 */
+	const x = vw / 2
+	const y = vh / 2
+	const [{ scale }, animate] = useSpring(() => ({ scale: 1 }))
 	const dragY = useDrag(
 		({ down, shiftKey, offset: [_, oy] }) => {
-			const value = shiftKey ? oy : Math.ceil(oy / 10) * 10
+			const value = shiftKey ? oy : stepped(oy, 10)
 			const normalizedElevation = normalize(value, dragRange, -dragRange)
 
 			// Damp the scale value to avoid the element scaling super tiny or large
@@ -41,13 +59,13 @@ const Target = ({
 				normalize(value, dragRange * damp, -dragRange * damp) +
 				initElevation
 
-			api.start({
+			animate.start({
 				scale: normalizedDampedElevation,
 				immediate: down
 			})
-			onVerticalDrag(normalizedElevation + minElevation)
-			setElevation(normalizedElevation)
-			setShowElevationBadge(down)
+
+			throttledTargetChange(x, y, normalizedElevation + minElevation)
+			setElevationBadge({ value: normalizedElevation, visible: down })
 		},
 		{
 			bounds: { top: -dragRange, bottom: dragRange },
@@ -59,14 +77,32 @@ const Target = ({
 	)
 
 	/**
-	 * ...there must be shadow.
+	 * Emit target elevation changes to parent scene component
 	 */
-	const tint = chroma(light.tint).gl()
+	const handleTargetChange = (x: number, y: number, elevation: number) => {
+		const data: TargetValues = { x, y, elevation }
+		onTargetChange(data)
+	}
+
+	const throttledTargetChange: Function = useMemo(
+		() => throttle(handleTargetChange, THROTTLE_SCENE_UPDATES),
+		[vw, vh]
+	)
+
+	useEffect(() => {
+		handleTargetChange(x, y, elevation)
+	}, [vw, vh])
+
+	/**
+	 * Calculate shadows
+	 */
+	const tint = chroma(scene.backdrop).gl()
+	const { azimuth, distance } = scene
 	const shadows = getCastedShadows({
 		intensity: 6,
-		azimuth: light.azimuth,
-		distance: light.distance,
-		elevation: light.targetElevation,
+		azimuth,
+		distance,
+		elevation,
 		tint: { r: tint[0], g: tint[1], b: tint[2] }
 	})
 
@@ -86,8 +122,8 @@ const Target = ({
 		<Fragment>
 			<div
 				class={styles.badge}
-				style={{ opacity: showElevationBadge ? 1 : 0 }}>
-				Elevation {Math.round(elevation * 100)}%
+				style={{ opacity: elevationBadge.visible ? 1 : 0 }}>
+				Elevation {Math.round(elevationBadge.value * 100)}%
 			</div>
 			<animated.div
 				class={styles.target}

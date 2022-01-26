@@ -1,37 +1,66 @@
+/**
+ * @file Light source component that can be dragged around the canvas.
+ *
+ * It emits four values to its parent scene component:
+ * @x @y Used to calculate the azimuth and distance to the shadow-receiving target element.
+ * @alignment Is the light currently aligned to any axis
+ * @pointerDown Is the light currently being clicked (ex. used to show the alignment helper lines)
+ */
+
 import { h, Ref } from 'preact'
-import { useState, useEffect } from 'preact/hooks'
+import { useMemo, useEffect } from 'preact/hooks'
+import { PreviewBounds } from '../../../../hooks/usePreviewBounds'
 import { useDrag } from '@use-gesture/react'
 import { useSpring, animated } from '@react-spring/web'
-import { PreviewBounds } from '../../../../hooks/usePreviewBounds'
-import { snapTo } from '../helpers/snap'
-
+import { throttle } from '../../../../utils/throttle'
+import { THROTTLE_SCENE_UPDATES } from '../../preview'
+import { snapToAxis } from '../helpers/snapToAxis'
 import styles from './light.css'
 
-interface LightInputProps {
-	size: number
-	bounds: Ref<any>
-	onLightInputDrag: Function
-	preview: PreviewBounds
+/**
+ * Types
+ */
+import { Alignment } from '../ShowAlignmentLines/lines'
+
+export interface LightValues {
+	x: number
+	y: number
+	alignment: Alignment
+	pointerDown: boolean
 }
 
-const SNAP_TO_CENTER_TRESHOLD = 6
+export interface LightProps {
+	size: number
+	bounds: Ref<any>
+	preview: PreviewBounds
+	onLightChange: Function
+}
 
-const LightInput = ({
+/**
+ * Constants
+ */
+
+const SNAP_TO_CENTER_TRESHOLD = 6 //px
+
+const Light = ({
 	size = 24,
 	bounds,
-	onLightInputDrag,
 	preview,
+	onLightChange,
 	...rest
-}: LightInputProps) => {
-	const [{ x, y }, api] = useSpring(() => ({ x: 0, y: 0 }))
+}: LightProps) => {
+	const { vw, vh } = preview
 
+	/**
+	 * Handle animation and drag logic
+	 */
+	const [{ x, y }, animate] = useSpring(() => ({ x: 0, y: 0 }))
 	const drag: any = useDrag(
 		({ down, shiftKey, offset: [ox, oy] }) => {
-			// snap to horizontal and vertical axis
-			const snapToX = preview.vw / 2 - size / 2
-			const snapToY = preview.vh / 2 - size / 2
+			const snapToX = vw / 2 - size / 2
+			const snapToY = vh / 2 - size / 2
 
-			const { position, snapped } = snapTo(
+			const { position, snappedTo } = snapToAxis(
 				ox,
 				oy,
 				snapToX,
@@ -39,8 +68,8 @@ const LightInput = ({
 				SNAP_TO_CENTER_TRESHOLD,
 				shiftKey
 			)
-			api.set(position)
-			onLightInputDrag(position, snapped, down)
+			animate.set(position)
+			throttledLightChange(position, snappedTo, down)
 		},
 		{
 			bounds: bounds,
@@ -49,20 +78,50 @@ const LightInput = ({
 	)
 
 	/**
-	 * Keep light source in bounds when plugin viewport is resized
+	 * Emit light source changes to parent scene component
+	 */
+	const handleLightChange = (
+		position: Vector,
+		alignment: Alignment = 'NONE',
+		pointerDown: boolean = false
+	) => {
+		const { x, y } = position
+		const data: LightValues = { x, y, alignment, pointerDown }
+		onLightChange(data)
+	}
+
+	const throttledLightChange: Function = useMemo(
+		() => throttle(handleLightChange, THROTTLE_SCENE_UPDATES),
+		[vw, vh]
+	)
+
+	/**
+	 * 1. Update light source when plugin window is resized.
+	 * 2. Keep light source in bounds when plugin window is resized.
 	 */
 	useEffect(() => {
-		if (preview.vw === 0 || preview.vh === 0) return
+		handleLightChange({ x: x.get(), y: y.get() })
+	}, [vw, vh])
+
+	useEffect(() => {
+		if (vw === 0 || vh === 0) return
 		const padding = 8
 		if (x.get() > preview.vw - size) {
-			api.start({ x: preview.vw - size - padding })
+			animate.start({ x: vw - size - padding })
 		}
 		if (y.get() > preview.vh - size) {
-			api.start({ y: preview.vh - size - padding })
+			animate.start({ y: vh - size - padding })
 		}
 	}, [preview])
 
-	return <animated.div class={styles.light} style={{ x, y }} {...drag()} />
+	return (
+		<animated.div
+			class={styles.light}
+			style={{ x, y }}
+			{...drag()}
+			{...rest}
+		/>
+	)
 }
 
-export default LightInput
+export default Light
