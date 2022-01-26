@@ -1,10 +1,13 @@
 .light {
 	position: absolute;
+	z-index: 1000;
 	top: 0;
 	left: 0;
 	width: 24px;
 	height: 24px;
-	border: 2px solid blue;
-	background: #fff;
+	box-sizing: border-box;
+	border: 2px solid #18a0fb;
+	background: #ffffff;
 	border-radius: 100%;
+	box-shadow: 0px 0px 44px 26px #ffffff;
 }

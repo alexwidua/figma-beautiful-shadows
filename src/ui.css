@@ -1,0 +1,9 @@
+.menu {
+	position: absolute;
+	right: 1rem;
+	bottom: 1rem;
+	padding: 12px;
+	background: #fff;
+	border-radius: 16px;
+	box-shadow: var(--box-shadow-modal);
+}

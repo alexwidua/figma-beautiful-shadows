@@ -41,8 +41,11 @@ const getCastedShadows = ({
 	if (tint) {
 		let hsl = chroma.gl(tint.r, tint.g, tint.b).hsl()
 		// check if color has hue (ex. no white, grey, black)
-		if (!isNaN(hsl[0])) {
-			hsl[2] = 0.2 // decrease lightness
+		if (isNaN(hsl[0])) {
+			hsl = [0, 0, 0]
+		} else {
+			// decrease lightness
+			hsl[2] = clamp(hsl[2] - 0.8, 0.1, 1)
 		}
 		color = chroma.hsl(hsl[0], hsl[1], hsl[2]).gl()
 	}

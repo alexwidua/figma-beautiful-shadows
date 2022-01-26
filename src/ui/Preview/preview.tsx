@@ -8,18 +8,24 @@ import ShowAlignmentLines from './components/ShowAlignmentLines/lines'
 import styles from './preview.css'
 
 /**
+ * Types
+ */
+
+interface PreviewProps {
+	backgroundColor: string
+	children: any
+}
+
+/**
  * Constants
  */
 export const THROTTLE_SCENE_UPDATES = 60 // ms
-
-const DEFAULT_BACKDROP_COLOR = '#000000'
 const LIGHT_SOURCE_SIZE = 24
-
 const ELEVATION_DRAG_RANGE = 50 // Range in px it takes to drag from elevation 0 to 1
 const INIT_ELEVATION = 0.5
 const MIN_ELEVATION = 0.025
 
-const Preview = () => {
+const Preview = ({ backgroundColor, children }: PreviewProps) => {
 	/**
 	 * Get bounds of the preview div.
 	 * The bounds are used to define the drag constraints for the light source,
@@ -45,7 +51,7 @@ const Preview = () => {
 	const [scene, setScene] = useState({
 		azimuth: 0,
 		distance: 0,
-		backdrop: '#000'
+		backgroundColor
 	})
 
 	/**
@@ -61,11 +67,14 @@ const Preview = () => {
 		const azimuth = vecAngle(_target, _light)
 		const distance = vecDistance(_light, _target)
 
-		setScene({ azimuth, distance, backdrop: DEFAULT_BACKDROP_COLOR })
-	}, [light, target])
+		setScene({ azimuth, distance, backgroundColor })
+	}, [light, target, backgroundColor])
 
 	return (
-		<div class={styles.container} ref={previewRef}>
+		<div
+			className={styles.container}
+			style={{ backgroundColor }}
+			ref={previewRef}>
 			<Target
 				preview={{ vw, vh }}
 				scene={scene}
@@ -89,6 +98,7 @@ const Preview = () => {
 				alignment={light.alignment}
 				offset={LIGHT_SOURCE_SIZE / 2}
 			/>
+			{children}
 		</div>
 	)
 }

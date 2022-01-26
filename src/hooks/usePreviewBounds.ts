@@ -6,7 +6,7 @@ export interface PreviewBounds {
 	vh: number
 }
 
-function usePreviewBounds(ref: any): PreviewBounds {
+const usePreviewBounds = (ref: any): PreviewBounds => {
 	const [previewBounds, setPreviewBounds] = useState<PreviewBounds>({
 		vw: 0,
 		vh: 0

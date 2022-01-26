@@ -96,7 +96,8 @@ const Target = ({
 	/**
 	 * Calculate shadows
 	 */
-	const tint = chroma(scene.backdrop).gl()
+	const tint = chroma(scene.backgroundColor).gl()
+
 	const { azimuth, distance } = scene
 	const shadows = getCastedShadows({
 		intensity: 6,
@@ -121,14 +122,14 @@ const Target = ({
 	return (
 		<Fragment>
 			<div
-				class={styles.badge}
+				className={styles.badge}
 				style={{ opacity: elevationBadge.visible ? 1 : 0 }}>
 				Elevation {Math.round(elevationBadge.value * 100)}%
 			</div>
 			<animated.div
-				class={styles.target}
+				className={styles.target}
 				style={{
-					boxShadow: shadowStyles,
+					boxShadow: shadowStyles.toString(),
 					transform: 'translate3d(-50%,-50%,0)',
 					scale: to([scale], (s) => s)
 				}}

@@ -104,7 +104,7 @@ const Light = ({
 	}, [vw, vh])
 
 	useEffect(() => {
-		if (vw === 0 || vh === 0) return
+		if (!vw || !vh) return
 		const padding = 8
 		if (x.get() > preview.vw - size) {
 			animate.start({ x: vw - size - padding })
@@ -116,7 +116,7 @@ const Light = ({
 
 	return (
 		<animated.div
-			class={styles.light}
+			className={styles.light}
 			style={{ x, y }}
 			{...drag()}
 			{...rest}

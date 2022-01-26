@@ -2,12 +2,6 @@
 	position: relative;
 	overflow: hidden;
 	width: 100%;
-	height: calc(100% - 4rem);
+	height: calc(100%);
 	background: #eee;
-}
-
-.menu {
-	position: absolute;
-	bottom: 1rem;
-	left: 1rem;
 }
