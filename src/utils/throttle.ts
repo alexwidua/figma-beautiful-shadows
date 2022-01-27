@@ -1,4 +1,4 @@
-const throttle = (fn: Function, wait: number) => {
+export function throttle(fn: Function, wait: number): Function {
 	let context: any, args: any, result: any
 	let timeout: number | null = null
 	let previous = 0
@@ -31,5 +31,3 @@ const throttle = (fn: Function, wait: number) => {
 		return result
 	}
 }
-
-export { throttle }

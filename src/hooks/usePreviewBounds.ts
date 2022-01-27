@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useState } from 'preact/hooks'
 import useDebounce from './useDebounce'
+import { WINDOW_INITIAL_WIDTH, WINDOW_INITIAL_HEIGHT } from '../constants'
 
 export interface PreviewBounds {
 	vw: number
@@ -8,8 +9,8 @@ export interface PreviewBounds {
 
 const usePreviewBounds = (ref: any): PreviewBounds => {
 	const [previewBounds, setPreviewBounds] = useState<PreviewBounds>({
-		vw: 0,
-		vh: 0
+		vw: WINDOW_INITIAL_WIDTH,
+		vh: WINDOW_INITIAL_HEIGHT
 	})
 	const debouncedValue = useDebounce<PreviewBounds>(previewBounds, 200)
 

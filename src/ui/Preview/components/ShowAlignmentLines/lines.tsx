@@ -1,6 +1,9 @@
 import { Fragment, h } from 'preact'
 import styles from './lines.css'
 
+/**
+ * Types
+ */
 export type Alignment = 'NONE' | 'CENTER' | 'HORIZONTAL' | 'VERTICAL'
 
 const showAlignmentLines = ({

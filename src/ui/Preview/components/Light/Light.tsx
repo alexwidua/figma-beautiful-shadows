@@ -13,34 +13,32 @@ import { PreviewBounds } from '../../../../hooks/usePreviewBounds'
 import { useDrag } from '@use-gesture/react'
 import { useSpring, animated } from '@react-spring/web'
 import { throttle } from '../../../../utils/throttle'
-import { THROTTLE_SCENE_UPDATES } from '../../preview'
 import { snapToAxis } from '../helpers/snapToAxis'
 import styles from './light.css'
+
+import {
+	WINDOW_INITIAL_WIDTH,
+	WINDOW_INITIAL_HEIGHT,
+	THROTTLE_SCENE_UPDATES,
+	PREVIEW_SNAP_ALIGN_TRESHOLD
+} from '../../../../constants'
 
 /**
  * Types
  */
 import { Alignment } from '../ShowAlignmentLines/lines'
-
 export interface LightValues {
 	x: number
 	y: number
 	alignment: Alignment
 	pointerDown: boolean
 }
-
 export interface LightProps {
 	size: number
 	bounds: Ref<any>
 	preview: PreviewBounds
 	onLightChange: Function
 }
-
-/**
- * Constants
- */
-
-const SNAP_TO_CENTER_TRESHOLD = 6 //px
 
 const Light = ({
 	size = 24,
@@ -50,11 +48,13 @@ const Light = ({
 	...rest
 }: LightProps) => {
 	const { vw, vh } = preview
-
 	/**
 	 * Handle animation and drag logic
 	 */
-	const [{ x, y }, animate] = useSpring(() => ({ x: 0, y: 0 }))
+	const [{ x, y }, animate] = useSpring(() => ({
+		x: WINDOW_INITIAL_WIDTH / 2 - size / 2,
+		y: WINDOW_INITIAL_HEIGHT / 4 - size / 2
+	}))
 	const drag: any = useDrag(
 		({ down, shiftKey, offset: [ox, oy] }) => {
 			const snapToX = vw / 2 - size / 2
@@ -65,7 +65,7 @@ const Light = ({
 				oy,
 				snapToX,
 				snapToY,
-				SNAP_TO_CENTER_TRESHOLD,
+				PREVIEW_SNAP_ALIGN_TRESHOLD,
 				shiftKey
 			)
 			animate.set(position)

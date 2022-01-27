@@ -28,8 +28,8 @@
 		"editorType": [
 			"figma"
 		],
-		"id": "figma-cast-shadow",
-		"name": "Cast shadow",
+		"id": "figma-smooth-shadows",
+		"name": "Smooth Shadows",
 		"main": "src/main.ts",
 		"ui": "src/ui.tsx"
 	},

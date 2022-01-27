@@ -1,14 +1,19 @@
 import { h, Fragment } from 'preact'
 import { useState, useMemo, useEffect } from 'preact/hooks'
-import { stepped, normalize } from '../../../../utils/math'
 import { useDrag } from '@use-gesture/react'
 import { useSpring, animated, to } from '@react-spring/web'
-import chroma from 'chroma-js'
 import { getCastedShadows } from '../../../../utils/shadow'
-import styles from './target.css'
 import { throttle } from '../../../../utils/throttle'
-import { THROTTLE_SCENE_UPDATES } from '../../preview'
+import { stepped, normalize, resizeCanvasElement } from '../../../../utils/math'
+import chroma from 'chroma-js'
+import styles from './target.css'
 
+import { THROTTLE_SCENE_UPDATES } from '../../../../constants'
+
+/**
+ * Types
+ */
+import { SelectionParameters } from '../../../../main'
 export interface TargetValues {
 	x: number
 	y: number
@@ -17,8 +22,8 @@ export interface TargetValues {
 
 interface TargetProps {
 	preview: any
+	canvasSelection: SelectionParameters
 	scene: any
-	elevation: number
 	dragRange: number
 	initElevation: number
 	minElevation: number
@@ -27,8 +32,8 @@ interface TargetProps {
 
 const Target = ({
 	preview,
+	canvasSelection,
 	scene,
-	elevation,
 	dragRange = 50,
 	initElevation = 0.5,
 	minElevation = 0.025,
@@ -96,28 +101,50 @@ const Target = ({
 	/**
 	 * Calculate shadows
 	 */
-	const tint = chroma(scene.backgroundColor).gl()
-
-	const { azimuth, distance } = scene
+	const { azimuth, distance, elevation, backgroundColor } = scene
 	const shadows = getCastedShadows({
 		intensity: 6,
 		azimuth,
 		distance,
 		elevation,
-		tint: { r: tint[0], g: tint[1], b: tint[2] }
+		backgroundColor,
+		size: { width: 100, height: 100 }
 	})
 
 	const shadowStyles = shadows.map(
 		(shadow) =>
 			`${shadow.offset.x}px ${shadow.offset.y}px ${
-				shadow.blur
+				shadow.radius
 			}px ${chroma.gl(
 				shadow.color.r,
 				shadow.color.g,
 				shadow.color.b,
-				shadow.opacity
+				shadow.color.a
 			)}`
 	)
+
+	/**
+	 * Style element depending on different selection states
+	 */
+	const { state, width, height, cornerRadius } = canvasSelection
+	const selected = state === 'VALID'
+
+	const targetSize = resizeCanvasElement(
+		width,
+		height,
+		cornerRadius,
+		100,
+		100
+	)
+
+	const selectionStyles = {
+		border: selected
+			? '1px solid var(--color-blue)'
+			: '1px solid rgba(0,0,0,0.2)',
+		width: targetSize.width || 100,
+		height: targetSize.height || 100,
+		borderRadius: targetSize.cornerRadius || 4
+	}
 
 	return (
 		<Fragment>
@@ -129,11 +156,13 @@ const Target = ({
 			<animated.div
 				className={styles.target}
 				style={{
+					...selectionStyles,
 					boxShadow: shadowStyles.toString(),
 					transform: 'translate3d(-50%,-50%,0)',
 					scale: to([scale], (s) => s)
 				}}
 				{...dragY()}
+				{...rest}
 			/>
 		</Fragment>
 	)

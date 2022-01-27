@@ -2,8 +2,8 @@
 	position: absolute;
 	right: 1rem;
 	bottom: 1rem;
-	padding: 12px;
+	padding: var(--space-extra-small);
 	background: #fff;
-	border-radius: 16px;
+	border-radius: 8px;
 	box-shadow: var(--box-shadow-modal);
 }

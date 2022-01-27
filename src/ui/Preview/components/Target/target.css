@@ -1,14 +1,13 @@
 .target {
 	position: absolute;
+	z-index: 10;
 	top: 50%;
 	left: 50%;
-	width: 100px;
-	height: 100px;
-	border: 1px solid var(--color-blue);
 	background: #fff;
-	border-radius: 16px;
 	cursor: ns-resize;
+	touch-action: none;
 	transform: translate3d(-50%, -50%, 0);
+	transition: height 0.2s, width 0.2s, border-radius 0.2s;
 }
 
 .badge {

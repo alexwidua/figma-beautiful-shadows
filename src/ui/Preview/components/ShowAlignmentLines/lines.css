@@ -1,6 +1,6 @@
 .line {
 	position: absolute;
-	z-index: 99999;
+	z-index: 100;
 	display: block;
 	background: var(--color-red);
 	pointer-events: none;

@@ -7,25 +7,41 @@ import Light, { LightValues } from './components/Light/light'
 import ShowAlignmentLines from './components/ShowAlignmentLines/lines'
 import styles from './preview.css'
 
+import {
+	TARGET_INITIAL_ELEVATION,
+	TARGET_MIN_ELEVATION,
+	TARGET_ELEVATION_DRAG_RANGE,
+	LIGHT_SOURCE_SIZE
+} from '../../constants'
+
 /**
  * Types
  */
-
+import { SelectionParameters } from '../../main'
 interface PreviewProps {
+	canvasSelection: SelectionParameters
 	backgroundColor: string
 	children: any
+	onSceneChange: Function
+}
+
+export interface Scene {
+	azimuth: number
+	distance: number
+	elevation: number
+	backgroundColor: string
 }
 
 /**
  * Constants
  */
-export const THROTTLE_SCENE_UPDATES = 60 // ms
-const LIGHT_SOURCE_SIZE = 24
-const ELEVATION_DRAG_RANGE = 50 // Range in px it takes to drag from elevation 0 to 1
-const INIT_ELEVATION = 0.5
-const MIN_ELEVATION = 0.025
 
-const Preview = ({ backgroundColor, children }: PreviewProps) => {
+const Preview = ({
+	canvasSelection,
+	backgroundColor,
+	children,
+	onSceneChange
+}: PreviewProps) => {
 	/**
 	 * Get bounds of the preview div.
 	 * The bounds are used to define the drag constraints for the light source,
@@ -46,11 +62,12 @@ const Preview = ({ backgroundColor, children }: PreviewProps) => {
 	const [target, setTarget] = useState<TargetValues>({
 		x: 0,
 		y: 0,
-		elevation: INIT_ELEVATION
+		elevation: TARGET_INITIAL_ELEVATION
 	})
-	const [scene, setScene] = useState({
+	const [scene, setScene] = useState<Scene>({
 		azimuth: 0,
 		distance: 0,
+		elevation: TARGET_INITIAL_ELEVATION,
 		backgroundColor
 	})
 
@@ -66,8 +83,11 @@ const Preview = ({ backgroundColor, children }: PreviewProps) => {
 
 		const azimuth = vecAngle(_target, _light)
 		const distance = vecDistance(_light, _target)
+		const elevation = target.elevation
 
-		setScene({ azimuth, distance, backgroundColor })
+		const data = { azimuth, distance, elevation, backgroundColor }
+		setScene(data)
+		onSceneChange(data)
 	}, [light, target, backgroundColor])
 
 	return (
@@ -77,11 +97,11 @@ const Preview = ({ backgroundColor, children }: PreviewProps) => {
 			ref={previewRef}>
 			<Target
 				preview={{ vw, vh }}
+				canvasSelection={canvasSelection}
 				scene={scene}
-				elevation={target.elevation}
-				dragRange={ELEVATION_DRAG_RANGE}
-				initElevation={INIT_ELEVATION}
-				minElevation={MIN_ELEVATION}
+				dragRange={TARGET_ELEVATION_DRAG_RANGE}
+				initElevation={TARGET_INITIAL_ELEVATION}
+				minElevation={TARGET_MIN_ELEVATION}
 				onTargetChange={(target: TargetValues) => setTarget(target)}
 			/>
 			<Light

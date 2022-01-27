@@ -1,10 +1,9 @@
 .panel {
 	position: absolute;
-	z-index: 100;
-	top: 0rem;
-	left: 0rem;
+	z-index: 99999;
+	top: 0;
+	right: 0rem;
 	width: auto;
-	max-width: 200px;
 	height: auto;
 	background: #fff;
 	border-radius: var(--border-radius-2);
@@ -19,11 +18,20 @@
 	pointer-events: all;
 	visibility: visible;
 }
+
 .top {
 	display: flex;
-	height: 32px;
 	align-items: center;
 	justify-content: space-between;
-	padding: 0 var(--space-small);
+	padding: 4px 4px 4px var(--space-small);
 	border-bottom: 1px solid var(--color-black-6-translucent);
+}
+
+.row {
+	display: flex;
+	align-items: center;
+}
+
+.label {
+	margin-right: 16px;
 }

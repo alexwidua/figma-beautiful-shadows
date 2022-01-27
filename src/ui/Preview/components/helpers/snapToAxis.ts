@@ -3,14 +3,14 @@ import { Alignment } from '../ShowAlignmentLines/lines'
 /**
  * Snap {x,y} to value if within a certain treshold.
  */
-const snapToAxis = (
+export function snapToAxis(
 	x: number,
 	y: number,
 	snapToX: number,
 	snapTo: number,
 	snapTreshold: number,
 	shiftPressed: boolean
-): { position: Vector; snappedTo: string } => {
+): { position: Vector; snappedTo: string } {
 	let position = { x, y }
 	let snappedTo: Alignment = 'NONE'
 
@@ -34,5 +34,3 @@ const snapToAxis = (
 
 	return { position, snappedTo }
 }
-
-export { snapToAxis }

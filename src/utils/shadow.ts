@@ -1,45 +1,36 @@
 import { clamp, normalize } from './math'
 import { easeQuadOut } from 'd3-ease'
 import chroma from 'chroma-js'
+import { SHADOW_BASE_BLUR, SHADOW_BASE_OPACITY } from '../constants'
 
-interface RGBgl {
-	r: number
-	g: number
-	b: number
-}
-
-interface LightSource {
+/**
+ * Types
+ */
+import { Scene } from './../ui/Preview/preview'
+interface SceneSetup extends Scene {
 	intensity: number
-	azimuth: number
-	distance: number
-	elevation: number
-	tint?: RGBgl
+	size: { width: number; height: number }
 }
 
-interface Shadow {
-	offset: Vector
-	blur: number
-	color: RGBgl
-	opacity: number
-	spread: number
-}
-
-// these values are based on trial error and gut feeling
-const BASE_BLUR = 50
-const BASE_OPACITY = 0.8
-
-const getCastedShadows = ({
+export function getCastedShadows({
 	intensity,
 	azimuth,
 	distance,
 	elevation,
-	tint
-}: LightSource): Shadow[] => {
+	backgroundColor,
+	size
+}: SceneSetup): DropShadowEffect[] {
+	// Scale shadow distance based on object size
+	const { width, height } = size
+	const longestSide = Math.max(width, height)
+	const factor = longestSide / 100
+	const relDistance = distance * factor
+
 	// apply tinted shadow if bg color is supplied
 	// s/o to https://www.joshwcomeau.com/css/designing-shadows/
 	let color = [0, 0, 0]
-	if (tint) {
-		let hsl = chroma.gl(tint.r, tint.g, tint.b).hsl()
+	if (backgroundColor) {
+		let hsl = chroma(backgroundColor).hsl()
 		// check if color has hue (ex. no white, grey, black)
 		if (isNaN(hsl[0])) {
 			hsl = [0, 0, 0]
@@ -50,21 +41,34 @@ const getCastedShadows = ({
 		color = chroma.hsl(hsl[0], hsl[1], hsl[2]).gl()
 	}
 
-	const shadows: Shadow[] = Array.from({ length: intensity }, (_, i) => {
-		const step = easeQuadOut(normalize(i, 0, intensity))
-		const blurShadowWithDistance = clamp(distance / 100, 0.8, 5) // values are purely based on gut feel
-		return {
-			offset: {
-				x: Math.cos(azimuth) * (distance * elevation * step),
-				y: Math.sin(azimuth) * (distance * elevation * step)
-			},
-			blur: BASE_BLUR * blurShadowWithDistance * step * (elevation * 2),
-			color: { r: color[0], g: color[1], b: color[2] },
-			opacity: BASE_OPACITY - BASE_OPACITY * step,
-			spread: 0
+	const shadows: DropShadowEffect[] = Array.from(
+		{ length: intensity },
+		(_, i) => {
+			const step = easeQuadOut(normalize(i, 0, intensity))
+			const blurShadowWithDistance = Math.max(relDistance / 100, 0.8) // values are purely based on gut feel
+			return {
+				// required for
+				type: 'DROP_SHADOW',
+				blendMode: 'NORMAL',
+				visible: true,
+				color: {
+					r: color[0],
+					g: color[1],
+					b: color[2],
+					a: SHADOW_BASE_OPACITY - SHADOW_BASE_OPACITY * step
+				},
+				offset: {
+					x: Math.cos(azimuth) * (relDistance * elevation * step),
+					y: Math.sin(azimuth) * (relDistance * elevation * step)
+				},
+				radius:
+					SHADOW_BASE_BLUR *
+					blurShadowWithDistance *
+					step *
+					(elevation * 2),
+				spread: 0
+			}
 		}
-	})
+	)
 	return shadows
 }
-
-export { getCastedShadows }

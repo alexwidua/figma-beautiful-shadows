@@ -1,6 +1,6 @@
 import { h } from 'preact'
 import { useState, useEffect, useRef } from 'preact/hooks'
-import useWindowBounds, { WindowBounds } from '../../hooks/useWindowBounds'
+import useWindowSize, { WindowSize } from '../../hooks/useWindowSize'
 import { useDrag } from '@use-gesture/react'
 import { useSpring, animated } from '@react-spring/web'
 import chroma from 'chroma-js'
@@ -19,6 +19,7 @@ import styles from './panel.css'
  * Types
  */
 interface PanelProps {
+	anchor: Partial<DOMRect>
 	panelOpen: boolean
 	onPanelClose: Function
 	BGOption: any
@@ -27,6 +28,7 @@ interface PanelProps {
 	panelDragBounds: any
 }
 const Panel = ({
+	anchor,
 	panelOpen,
 	onPanelClose,
 	BGOption,
@@ -34,7 +36,7 @@ const Panel = ({
 	onBGOptionChange,
 	panelDragBounds
 }: PanelProps) => {
-	const { vw, vh }: WindowBounds = useWindowBounds()
+	const { vw, vh }: WindowSize = useWindowSize()
 	const panelRef = useRef<any>()
 
 	/**
@@ -54,23 +56,31 @@ const Panel = ({
 		// keep panel in bounds
 		if (!vw || !vh || !panelRef.current) return
 		const rect = panelRef.current.getBoundingClientRect()
-		if (x.get() + rect.width > vw) {
-			animate.start({ x: vw - rect.width })
+		const padding = 32
+		if (x.get() < 0 - vw + rect.width) {
+			animate.start({ x: 0 - vw + rect.width + padding })
 		}
-		if (y.get() + rect.height > vh) {
-			animate.start({ y: vh - rect.height })
+		if (y.get() < 0 - vh + rect.height) {
+			animate.start({ y: 0 - vh + rect.height + padding })
 		}
 	}, [vw, vh])
 
 	const handlePanelClose = () => {
-		animate.start({ x: 0, y: 0 })
 		onPanelClose()
 	}
+
+	// Spawn panel anchored to another element
+	useEffect(() => {
+		if (!panelRef.current) return
+		const rect = panelRef.current.getBoundingClientRect()
+		const padding = 8
+		animate.set({ x: 0, y: 0 - rect.height - padding })
+	}, [anchor, panelOpen])
 
 	/**
 	 * Handle backdrop color input
 	 */
-	const [tempBackgroundColor, setTempBackgroundColor] = useState('#000')
+	const [tempBackgroundColor, setTempBackgroundColor] = useState('#e5e5e5')
 	const handleBackgroundColorInput = (e: any) => {
 		const color = e.currentTarget.value
 		setTempBackgroundColor(color)
@@ -81,17 +91,23 @@ const Panel = ({
 		return valid
 	}
 	const backgroundOptions: any = [
-		{ value: 'DETECT', children: 'Detect' },
+		{ value: 'DISABLE', children: '-' },
+		{ value: 'DETECT', children: 'Automatic' },
 		{
 			value: 'CUSTOM',
 			children: (
 				<Textbox
 					onClick={() => onBGOptionChange('CUSTOM')}
 					onInput={handleBackgroundColorInput}
-					value={tempBackgroundColor}
+					value={
+						BGOption === 'CUSTOM'
+							? tempBackgroundColor
+							: 'Choose...'
+					}
 					validateOnBlur={validateColorOnBlur}
 					style={{
 						height: 24,
+						width: 64,
 						opacity: BGOption === 'CUSTOM' ? 1 : 0.4
 					}}
 				/>
@@ -109,20 +125,28 @@ const Panel = ({
 			ref={panelRef}
 			{...drag()}>
 			<div class={styles.top}>
-				<Text bold>Backdrop</Text>
+				<Text bold>Options</Text>
 				<IconButton onChange={handlePanelClose} value={false}>
 					<IconCross32 />
 				</IconButton>
 			</div>
 			<VerticalSpace space={'small'} />
 			<Container space={'small'}>
-				<SegmentedControl
-					onChange={(e) => onBGOptionChange(e.currentTarget.value)}
-					options={backgroundOptions}
-					value={BGOption}
-				/>
+				<div className={styles.row}>
+					<Text className={styles.label}>Background</Text>
+					<SegmentedControl
+						onChange={(e) =>
+							onBGOptionChange(e.currentTarget.value)
+						}
+						options={backgroundOptions}
+						value={BGOption}
+					/>
+				</div>
 				<VerticalSpace space={'small'} />
-				<Text muted>TODO: Copy here</Text>
+				<Text muted>
+					The background color is used to tint the shadow for a more
+					realistic result.
+				</Text>
 				<VerticalSpace space={'small'} />
 			</Container>
 		</animated.div>
