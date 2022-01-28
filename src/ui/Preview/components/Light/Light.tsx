@@ -138,6 +138,7 @@ const Light = ({
 	const brightnessDragMax = -20
 	const sunRayMinWidth = 4
 	const sunRayMaxWidth = 16
+	const sunRayThickness = 1
 	const sunRayRadius = 24
 	const opacity_min = 0.4
 	const opacity_max = 1
@@ -193,7 +194,7 @@ const Light = ({
 					left: '50%',
 					top: '50%',
 					width: sunRayWidth,
-					height: 2,
+					height: sunRayThickness,
 					borderRadius: 1,
 					background: 'var(--color-blue)',
 					transform: `translateY(-50%) translateX(-50%) rotate(${deg}deg)`,

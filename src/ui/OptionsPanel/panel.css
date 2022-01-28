@@ -10,6 +10,7 @@
 	box-shadow: var(--box-shadow-modal);
 	opacity: 0;
 	pointer-events: none;
+	touch-action: none;
 	visibility: hidden;
 }
 

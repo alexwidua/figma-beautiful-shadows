@@ -8,7 +8,9 @@ export function searchForIntersectingNode(
 
 	if ('children' in node) {
 		// skip instances because they inherit their color props from
-		if (node.type !== 'INSTANCE') {
+		if (node.type === 'FRAME') {
+			return node
+		} else if (node.type !== 'INSTANCE') {
 			for (const child of node.children) {
 				const childAbs = getAbsolutePosition(child)
 				const refAbs = getAbsolutePosition(ref)
