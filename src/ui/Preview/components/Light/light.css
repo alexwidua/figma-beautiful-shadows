@@ -3,11 +3,79 @@
 	z-index: 10;
 	top: 0;
 	left: 0;
-	width: 24px;
-	height: 24px;
-	box-sizing: border-box;
-	border: 2px solid #18a0fb;
-	background: #ffffff;
+}
+
+.glow {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 32px;
+	height: 32px;
+	background: #fff;
 	border-radius: 100%;
-	box-shadow: 0px 0px 44px 26px #ffffff;
+	box-shadow: 0px 0px 32px 32px #ffffff;
+}
+.body {
+	position: absolute;
+	z-index: 100;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: #fff;
+	border-radius: 100%;
+	box-shadow: 0px 0px 0px 2px var(--color-blue) inset;
+	pointer-events: none;
+}
+
+.slider {
+	position: absolute;
+	z-index: 100;
+	top: -50%;
+	left: 50%;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	transform: translate3d(-50%, 0, 0);
+	transition: opacity 0.1s;
+}
+
+.slider:hover {
+	opacity: 1 !important;
+}
+
+.showSliderOnHover {
+	position: absolute;
+	top: -125%;
+	left: -125%;
+	width: 350%;
+	height: 350%;
+}
+
+.showSliderOnHover:hover + .slider {
+	opacity: 1 !important;
+}
+
+.handle {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	display: block;
+	width: 12px;
+	height: 12px;
+	background: #fff;
+	border-radius: 100%;
+	box-shadow: 0px 0px 0px 1px var(--color-blue) inset;
+	transition: opacity 0.1s;
+}
+
+.handle[data-down='true']::before {
+	position: absolute;
+
+	top: 100%;
+	left: calc(50% + 1px);
+	height: 32px;
+	border-left: 1px dashed var(--color-blue);
+	content: '';
+	transform: translateX(calc(-50% - 1px));
 }

@@ -72,13 +72,18 @@ const Plugin = () => {
 	/**
 	 * Emit changes to plugin
 	 */
+
+	// Apply changes and close ui
 	const handleApplyButtonClick = useCallback(() => {
 		emit('APPLY')
 	}, [])
+
+	// Update scene and re-draw shadows on canvas element
 	const handleSceneChange = useCallback((data: Scene) => {
 		emit('SCENE_UPDATE', data)
 	}, [])
 
+	// Handle detected background color from canvas element
 	const handleDeriveBGColorFromCanvas = (data: SolidPaint) => {
 		let color
 		if (data) {
@@ -91,6 +96,7 @@ const Plugin = () => {
 		setDetectedBGColor(color)
 	}
 
+	// Handle selection changes and updates visual states (ex. selection outlines)
 	const handleSelectionChange = (selection: SelectionParameters) => {
 		setCanvasSelection(selection)
 	}
@@ -127,7 +133,7 @@ const Plugin = () => {
 				}
 				onSceneChange={handleSceneChange}>
 				<div className={styles.menu} ref={menuRef}>
-					<Columns space="small">
+					<Columns space="extraSmall">
 						<IconButton
 							onChange={() =>
 								setOptionsPanelOpen((prev) => !prev)

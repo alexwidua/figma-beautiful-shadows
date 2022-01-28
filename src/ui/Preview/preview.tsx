@@ -11,7 +11,8 @@ import {
 	TARGET_INITIAL_ELEVATION,
 	TARGET_MIN_ELEVATION,
 	TARGET_ELEVATION_DRAG_RANGE,
-	LIGHT_SOURCE_SIZE
+	LIGHT_SOURCE_SIZE,
+	LIGHT_INITIAL_BRIGHTNESS
 } from '../../constants'
 
 /**
@@ -29,6 +30,7 @@ export interface Scene {
 	azimuth: number
 	distance: number
 	elevation: number
+	brightness: number
 	backgroundColor: string
 }
 
@@ -57,6 +59,7 @@ const Preview = ({
 		x: 0,
 		y: 0,
 		alignment: 'NONE',
+		brightness: LIGHT_INITIAL_BRIGHTNESS,
 		pointerDown: false
 	})
 	const [target, setTarget] = useState<TargetValues>({
@@ -68,6 +71,7 @@ const Preview = ({
 		azimuth: 0,
 		distance: 0,
 		elevation: TARGET_INITIAL_ELEVATION,
+		brightness: LIGHT_INITIAL_BRIGHTNESS,
 		backgroundColor
 	})
 
@@ -83,9 +87,16 @@ const Preview = ({
 
 		const azimuth = vecAngle(_target, _light)
 		const distance = vecDistance(_light, _target)
-		const elevation = target.elevation
+		const elevation = target?.elevation || 0
+		const brightness = light?.brightness || 0
 
-		const data = { azimuth, distance, elevation, backgroundColor }
+		const data = {
+			azimuth,
+			distance,
+			elevation,
+			brightness,
+			backgroundColor
+		}
 		setScene(data)
 		onSceneChange(data)
 	}, [light, target, backgroundColor])
@@ -106,9 +117,14 @@ const Preview = ({
 			/>
 			<Light
 				preview={{ vw, vh }}
-				size={24}
+				size={LIGHT_SOURCE_SIZE}
 				bounds={previewRef}
-				onLightChange={(light: LightValues) => setLight(light)}
+				onPositionChange={(light: LightValues) =>
+					setLight((prev) => ({ ...prev, ...light }))
+				}
+				onBrightnessChange={(brightness: number) =>
+					setLight((prev) => ({ ...prev, brightness }))
+				}
 			/>
 			<ShowAlignmentLines
 				visible={light.pointerDown}

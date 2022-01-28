@@ -6,6 +6,7 @@ import { getCastedShadows } from '../../../../utils/shadow'
 import { throttle } from '../../../../utils/throttle'
 import { stepped, normalize, resizeCanvasElement } from '../../../../utils/math'
 import chroma from 'chroma-js'
+import Badge from '../Badge/badge'
 import styles from './target.css'
 
 import { THROTTLE_SCENE_UPDATES } from '../../../../constants'
@@ -101,12 +102,13 @@ const Target = ({
 	/**
 	 * Calculate shadows
 	 */
-	const { azimuth, distance, elevation, backgroundColor } = scene
+	const { azimuth, distance, elevation, brightness, backgroundColor } = scene
 	const shadows = getCastedShadows({
-		intensity: 6,
+		smoothness: 6,
 		azimuth,
 		distance,
 		elevation,
+		brightness,
 		backgroundColor,
 		size: { width: 100, height: 100 }
 	})
@@ -148,11 +150,17 @@ const Target = ({
 
 	return (
 		<Fragment>
-			<div
-				className={styles.badge}
-				style={{ opacity: elevationBadge.visible ? 1 : 0 }}>
+			<Badge
+				visible={elevationBadge.visible}
+				style={{
+					position: 'absolute',
+					left: '50%',
+					top: '50%',
+					transform: 'translate3d(-50%, 76px, 0)',
+					boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.4)'
+				}}>
 				Elevation {Math.round(elevationBadge.value * 100)}%
-			</div>
+			</Badge>
 			<animated.div
 				className={styles.target}
 				style={{

@@ -18,9 +18,12 @@ export const THROTTLE_SCENE_UPDATES = 60 // ms
  * Casted shadow
  */
 export const SHADOW_BASE_BLUR = 50
-export const SHADOW_BASE_OPACITY = 0.8
+export const SHADOW_BASE_OPACITY = 0.65
 
-export const LIGHT_SOURCE_SIZE = 24
+export const LIGHT_SOURCE_SIZE = 32
+export const LIGHT_INITIAL_BRIGHTNESS = 0.6 // value between 0-1
+export const LIGHT_MIN_BRIGHTNESS = 0.1 // value between 0-1
+
 export const TARGET_ELEVATION_DRAG_RANGE = 50 // Range in px it takes to drag from elevation 0 to 1
 export const TARGET_INITIAL_ELEVATION = 0.5
 export const TARGET_MIN_ELEVATION = 0.025

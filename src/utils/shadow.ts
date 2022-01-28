@@ -8,15 +8,16 @@ import { SHADOW_BASE_BLUR, SHADOW_BASE_OPACITY } from '../constants'
  */
 import { Scene } from './../ui/Preview/preview'
 interface SceneSetup extends Scene {
-	intensity: number
+	smoothness: number
 	size: { width: number; height: number }
 }
 
 export function getCastedShadows({
-	intensity,
+	smoothness,
 	azimuth,
 	distance,
 	elevation,
+	brightness,
 	backgroundColor,
 	size
 }: SceneSetup): DropShadowEffect[] {
@@ -42,9 +43,9 @@ export function getCastedShadows({
 	}
 
 	const shadows: DropShadowEffect[] = Array.from(
-		{ length: intensity },
+		{ length: smoothness },
 		(_, i) => {
-			const step = easeQuadOut(normalize(i, 0, intensity))
+			const step = easeQuadOut(normalize(i, 0, smoothness))
 			const blurShadowWithDistance = Math.max(relDistance / 100, 0.8) // values are purely based on gut feel
 			return {
 				// required for
@@ -55,7 +56,7 @@ export function getCastedShadows({
 					r: color[0],
 					g: color[1],
 					b: color[2],
-					a: SHADOW_BASE_OPACITY - SHADOW_BASE_OPACITY * step
+					a: brightness - brightness * step
 				},
 				offset: {
 					x: Math.cos(azimuth) * (relDistance * elevation * step),

@@ -28,8 +28,8 @@
 		"editorType": [
 			"figma"
 		],
-		"id": "figma-smooth-shadows",
-		"name": "Smooth Shadows",
+		"id": "1068595505353552645",
+		"name": "Beautiful Shadows",
 		"main": "src/main.ts",
 		"ui": "src/ui.tsx"
 	},

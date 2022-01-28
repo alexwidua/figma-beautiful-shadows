@@ -99,12 +99,14 @@ export default function () {
 	function drawShadows(): void {
 		if (!nodeRef || !scene) return
 
-		const { azimuth, distance, elevation, backgroundColor } = scene
+		const { azimuth, distance, elevation, brightness, backgroundColor } =
+			scene
 		const shadows = getCastedShadows({
-			intensity: 6,
+			smoothness: 6,
 			azimuth,
 			distance,
 			elevation,
+			brightness,
 			backgroundColor,
 			size: { width: nodeRef.width, height: nodeRef.height }
 		})
