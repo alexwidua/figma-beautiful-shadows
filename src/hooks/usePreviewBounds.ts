@@ -3,14 +3,14 @@ import useDebounce from './useDebounce'
 import { WINDOW_INITIAL_WIDTH, WINDOW_INITIAL_HEIGHT } from '../constants'
 
 export interface PreviewBounds {
-	vw: number
-	vh: number
+	width: number
+	height: number
 }
 
 const usePreviewBounds = (ref: any): PreviewBounds => {
 	const [previewBounds, setPreviewBounds] = useState<PreviewBounds>({
-		vw: WINDOW_INITIAL_WIDTH,
-		vh: WINDOW_INITIAL_HEIGHT
+		width: WINDOW_INITIAL_WIDTH,
+		height: WINDOW_INITIAL_HEIGHT
 	})
 	const debouncedValue = useDebounce<PreviewBounds>(previewBounds, 200)
 
@@ -19,8 +19,8 @@ const usePreviewBounds = (ref: any): PreviewBounds => {
 		const rect = ref.current.getBoundingClientRect()
 
 		setPreviewBounds({
-			vw: rect.width,
-			vh: rect.height
+			width: rect.width,
+			height: rect.height
 		})
 	}
 

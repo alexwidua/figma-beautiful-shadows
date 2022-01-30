@@ -1,61 +1,68 @@
 import { Fragment, h } from 'preact'
+import useStore from '../../../../store/useStore'
 import styles from './lines.css'
 
-/**
- * Types
- */
-export type Alignment = 'NONE' | 'CENTER' | 'HORIZONTAL' | 'VERTICAL'
+const ShowAlignmentLines = () => {
+	const {
+		previewBounds,
+		lightSize,
+		lightPosition,
+		lightAlignment,
+		positionPointerDown
+	} = useStore((state: any) => ({
+		previewBounds: state.previewBounds,
+		lightSize: state.light.size,
+		lightPosition: { x: state.light.x, y: state.light.y },
+		lightAlignment: state.light.alignment,
+		positionPointerDown: state.light.positionPointerDown
+	}))
+	const offset = lightSize / 2
 
-const showAlignmentLines = ({
-	visible = false,
-	offset = 12,
-	x,
-	y,
-	alignment,
-	preview
-}: {
-	visible: boolean
-	offset: number
-	x: number
-	y: number
-	alignment: Alignment
-	preview: any
-}) => {
-	const { vw, vh } = preview
+	const isVisible = positionPointerDown
+	const isCentered = lightAlignment === 'CENTER'
+	const isHorizontal = lightAlignment === 'HORIZONTAL'
+	const isVertical = lightAlignment === 'VERTICAL'
+	const isAbove = lightPosition.y < previewBounds.height / 2
+	const isLefthand = lightPosition.x < previewBounds.width / 2
 
-	const isCentered = alignment === 'CENTER'
-	const isAlongX = alignment === 'HORIZONTAL'
-	const isAlongY = alignment === 'VERTICAL'
-
-	const isLeftHandSide = x < vw / 2
-	const isAbove = y < vh / 2
-
-	const lineX = {
-		opacity: visible && (isCentered || isAlongX) ? 1 : 0,
-		top: isCentered ? 0 : isAbove ? y + offset : vh / 2,
+	const horizontal = {
+		opacity: isVisible && (isCentered || isHorizontal) ? 1 : 0,
+		top: isCentered
+			? 0
+			: isAbove
+			? lightPosition.y + offset
+			: previewBounds.height / 2,
 		height: isCentered
 			? '100%'
 			: isAbove
-			? vh / 2 - y - offset
-			: y - vh / 2 + offset
+			? previewBounds.height / 2 - lightPosition.y - offset
+			: lightPosition.y - previewBounds.height / 2 + offset
 	}
 
-	const lineY = {
-		opacity: visible && (isCentered || isAlongY) ? 1 : 0,
-		left: isCentered ? 0 : isLeftHandSide ? x + offset : vw / 2,
+	const vertical = {
+		opacity: isVisible && (isCentered || isVertical) ? 1 : 0,
+		left: isCentered
+			? 0
+			: isLefthand
+			? lightPosition.x + offset
+			: previewBounds.width / 2,
 		width: isCentered
 			? '100%'
-			: isLeftHandSide
-			? vw / 2 - x - offset
-			: x - vw / 2 + offset
+			: isLefthand
+			? previewBounds.width / 2 - lightPosition.x - offset
+			: lightPosition.x - previewBounds.width / 2 + offset
 	}
 
 	return (
 		<Fragment>
-			<div class={`${styles.line} ${styles.x}`} style={lineX}></div>
-			<div class={`${styles.line} ${styles.y}`} style={lineY}></div>
+			<div
+				class={`${styles.line} ${styles.horizontal}`}
+				style={horizontal}></div>
+			<div
+				class={`${styles.line} ${styles.vertical}`}
+				style={vertical}></div>
 		</Fragment>
 	)
 }
 
-export default showAlignmentLines
+export default ShowAlignmentLines

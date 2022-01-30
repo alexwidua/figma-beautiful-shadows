@@ -1,16 +1,17 @@
 import { getAbsolutePosition } from '@create-figma-plugin/utilities'
 
-export function searchForIntersectingNode(
+export function searchForEnclosingNode(
 	node: PageNode | SceneNode,
 	ref: SceneNode
 ): any {
 	if (!node || !ref) return
-
 	if ('children' in node) {
-		// skip instances because they inherit their color props from
+		// if frame, assume that frame background is the background color
 		if (node.type === 'FRAME') {
 			return node
-		} else if (node.type !== 'INSTANCE') {
+		}
+		// skip instances because instance nodes don't have own color fills
+		else if (node.type !== 'INSTANCE') {
 			for (const child of node.children) {
 				const childAbs = getAbsolutePosition(child)
 				const refAbs = getAbsolutePosition(ref)
@@ -22,11 +23,11 @@ export function searchForIntersectingNode(
 					childAbs.y + child.height >= refAbs.y + ref.height
 				) {
 					if (child.type === 'FRAME' || child.type === 'GROUP') {
-						return searchForIntersectingNode(child, ref)
+						return searchForEnclosingNode(child, ref)
 					} else {
 						return child
 					}
-				} else searchForIntersectingNode(child, ref)
+				} else searchForEnclosingNode(child, ref)
 			}
 		}
 	}

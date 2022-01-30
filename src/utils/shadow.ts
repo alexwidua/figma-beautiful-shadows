@@ -1,14 +1,15 @@
 import { clamp, normalize } from './math'
 import { easeQuadOut } from 'd3-ease'
 import chroma from 'chroma-js'
-import { SHADOW_BASE_BLUR, SHADOW_BASE_OPACITY } from '../constants'
+import { SHADOW_BASE_BLUR } from '../constants'
 
-/**
- * Types
- */
-import { Scene } from './../ui/Preview/preview'
-interface SceneSetup extends Scene {
+interface ShadowRecipe {
 	smoothness: number
+	azimuth: number
+	distance: number
+	elevation: number
+	brightness: number
+	backgroundColor: string
 	size: { width: number; height: number }
 }
 
@@ -20,8 +21,8 @@ export function getCastedShadows({
 	brightness,
 	backgroundColor,
 	size
-}: SceneSetup): DropShadowEffect[] {
-	// Scale shadow distance based on object size
+}: ShadowRecipe): DropShadowEffect[] {
+	// Scale shadow with object size
 	const { width, height } = size
 	const longestSide = Math.max(width, height)
 	const factor = longestSide / 100
@@ -48,7 +49,6 @@ export function getCastedShadows({
 			const step = easeQuadOut(normalize(i, 0, smoothness))
 			const blurShadowWithDistance = Math.max(relDistance / 100, 0.8) // values are purely based on gut feel
 			return {
-				// required for
 				type: 'DROP_SHADOW',
 				blendMode: 'NORMAL',
 				visible: true,

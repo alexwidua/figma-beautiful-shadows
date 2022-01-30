@@ -1,7 +1,4 @@
-/**
- * Types
- */
-export type SelectionState =
+export type SelectionValidity =
 	| 'MULTIPLE'
 	| 'VALID'
 	| 'INVALID'
@@ -13,12 +10,12 @@ export type SelectionState =
 /**
  * Checks if current selection is empty, multiple, valid or updateable.
  * @param selection - Current page selection
- * @returns {SelectionType}
+ * @returns {SelectionValidity}
  */
 export function validateSelection(
 	selection: ReadonlyArray<SceneNode>,
 	validNodeTypes: Array<NodeType>
-): SelectionState {
+): SelectionValidity {
 	if (selection.length) {
 		if (selection.length > 1) {
 			return 'MULTIPLE'

@@ -10,7 +10,8 @@
 		"d3-ease": "^3.0.1",
 		"preact": "^10",
 		"stylelint": "^14.3.0",
-		"stylelint-config-idiomatic-order": "^8.1.0"
+		"stylelint-config-idiomatic-order": "^8.1.0",
+		"zustand": "^3.6.9"
 	},
 	"devDependencies": {
 		"@create-figma-plugin/build": "^1.8.2",

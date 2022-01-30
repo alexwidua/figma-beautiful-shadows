@@ -1,115 +1,87 @@
 import { h } from 'preact'
-import { useRef, useState, useEffect, useCallback } from 'preact/hooks'
+import useStore from './store/useStore'
+import { useRef, useEffect, useCallback } from 'preact/hooks'
 import { emit, on } from '@create-figma-plugin/utilities'
-import Preview from './ui/Preview/preview'
-import OptionsPanel from './ui/OptionsPanel/panel'
+import { useWindowResize, render } from '@create-figma-plugin/ui'
+import { debounce } from './utils/debounce'
 import chroma from 'chroma-js'
+import Preview from './ui/Preview/preview'
+import Menu from './ui/Menu/menu'
 import {
-	Button,
-	Columns,
-	useWindowResize,
-	IconButton,
-	IconAdjust32,
-	render
-} from '@create-figma-plugin/ui'
-import styles from './ui.css'
-
-import {
+	DEBOUNCE_CANVAS_UPDATES,
 	WINDOW_MIN_WIDTH,
 	WINDOW_MAX_WIDTH,
 	WINDOW_MIN_HEIGHT,
 	WINDOW_MAX_HEIGHT,
-	SCENE_DEFAULT_BG_COLOR
+	BACKGROUND_DEFAULT_COLOR
 } from './constants'
 
-/**
- * Types
- */
-import { Scene } from './ui/Preview/preview'
-import { SelectionParameters } from './main'
-export type BackgroundOption = 'DISABLE' | 'DETECT' | 'CUSTOM'
+// Types
+import { Selection } from './store/createSelection'
+import { Background } from './store/createBackground'
 
 const Plugin = () => {
-	/**
-	 * UI states
-	 */
-	const [optionsPanelOpen, setOptionsPanelOpen] = useState<boolean>(false)
-	const [BGOption, setBGOption] = useState<BackgroundOption>('DETECT')
-	const [detectedBGColor, setDetectedBGColor] = useState<string>(
-		SCENE_DEFAULT_BG_COLOR
-	)
-	const [customBGColor, setCustomBGColor] = useState<string>(
-		SCENE_DEFAULT_BG_COLOR
-	)
-	const [canvasSelection, setCanvasSelection] = useState<SelectionParameters>(
-		{
-			state: 'EMPTY',
-			type: 'RECTANGLE',
-			width: 0,
-			height: 0,
-			cornerRadius: 0
-		}
-	)
+	const bounds = useRef<any>()
+	makePluginResizeable()
+	const { preview, setBackground, setSelection } = useStore((state: any) => ({
+		preview: state.preview,
+		setBackground: state.setBackground,
+		setSelection: state.setSelection
+	}))
 
 	/**
-	 * Menu
+	 * ✉️ Emit preview update TO plugin (main.ts)
 	 */
-	const menuRef = useRef<any>()
-	const [menuRect, setMenuRect] = useState<Partial<DOMRect>>({
-		x: 0,
-		y: 0,
-		width: 0,
-		height: 0
-	})
-
 	useEffect(() => {
-		if (!menuRef.current) return
-		const rect = menuRef.current.getBoundingClientRect()
-		const { x, y, width, height } = rect
-		setMenuRect({ x, y, width, height })
-	}, [menuRef])
+		debounceCanvasUpdate(preview)
+	}, [preview])
+	const debounceCanvasUpdate = useCallback(
+		debounce(
+			(data) => emit('UPDATE_SHADOWS', data),
+			DEBOUNCE_CANVAS_UPDATES
+		),
+		[]
+	)
 
 	/**
-	 * Emit changes to plugin
+	 * 👂 Listen for changes FROM plugin (main.ts)
+	 *
+	 * · Listen for selection updates and style the target element respectively
+	 * · See if a background color can be derived from the canvas (by checking nodes that intersect with selection)
 	 */
-
-	// Apply changes and close ui
-	const handleApplyButtonClick = useCallback(() => {
-		emit('APPLY')
-	}, [])
-
-	// Update scene and re-draw shadows on canvas element
-	const handleSceneChange = useCallback((data: Scene) => {
-		emit('SCENE_UPDATE', data)
-	}, [])
-
-	// Handle detected background color from canvas element
-	const handleDeriveBGColorFromCanvas = (data: SolidPaint) => {
-		let color
-		if (data) {
-			const { opacity } = data
-			const { r, g, b } = data.color
-			color = chroma.gl(r, g, b, opacity).hex()
-		} else {
-			color = SCENE_DEFAULT_BG_COLOR
-		}
-		setDetectedBGColor(color)
-	}
-
-	// Handle selection changes and updates visual states (ex. selection outlines)
-	const handleSelectionChange = (selection: SelectionParameters) => {
-		setCanvasSelection(selection)
-	}
-
 	useEffect(() => {
-		on('DERIVE_BACKGROUND_COLOR', handleDeriveBGColorFromCanvas)
-		on('SELECTION_CHANGE', handleSelectionChange)
+		on('DERIVED_BACKGROUND_COLOR_FROM_CANVAS', updateDerivedBackgroundColor)
+		on('SELECTION_CHANGE', updateSelection)
 	}, [])
 
-	/**
-	 * Add resizeable plugin window
-	 */
-	const windowRef = useRef<any>()
+	const updateSelection = useCallback((selection: Selection) => {
+		setSelection(selection)
+	}, [])
+
+	const updateDerivedBackgroundColor = useCallback(
+		(backgroundColor: SolidPaint | undefined) => {
+			let color
+			if (backgroundColor) {
+				const { opacity } = backgroundColor
+				const { r, g, b } = backgroundColor.color
+				color = chroma.gl(r, g, b, opacity).hex()
+			} else {
+				color = BACKGROUND_DEFAULT_COLOR
+			}
+			const data: Partial<Background> = { auto: color }
+			setBackground(data)
+		},
+		[setBackground]
+	)
+
+	return (
+		<Preview ref={bounds}>
+			<Menu bounds={bounds} />
+		</Preview>
+	)
+}
+
+const makePluginResizeable = () => {
 	const onWindowResize = (windowSize: { width: number; height: number }) => {
 		emit('RESIZE_WINDOW', windowSize)
 	}
@@ -119,49 +91,7 @@ const Plugin = () => {
 		maxWidth: WINDOW_MAX_WIDTH,
 		maxHeight: WINDOW_MAX_HEIGHT
 	})
-
-	return (
-		<div ref={windowRef} style={{ background: '#e5e5e5' }}>
-			<Preview
-				canvasSelection={canvasSelection}
-				backgroundColor={
-					BGOption === 'DISABLE'
-						? SCENE_DEFAULT_BG_COLOR
-						: BGOption === 'DETECT'
-						? detectedBGColor
-						: customBGColor
-				}
-				onSceneChange={handleSceneChange}>
-				<div className={styles.menu} ref={menuRef}>
-					<Columns space="extraSmall">
-						<IconButton
-							onChange={() =>
-								setOptionsPanelOpen((prev) => !prev)
-							}
-							value={optionsPanelOpen}>
-							<IconAdjust32 />
-						</IconButton>
-						<Button
-							style={{ minWidth: 96 }}
-							onClick={handleApplyButtonClick}>
-							Apply
-						</Button>
-					</Columns>
-					<OptionsPanel
-						anchor={menuRect}
-						panelOpen={optionsPanelOpen}
-						BGOption={BGOption}
-						panelDragBounds={windowRef}
-						onPanelClose={() => setOptionsPanelOpen(false)}
-						onBGColorChange={(color: any) =>
-							setCustomBGColor(color)
-						}
-						onBGOptionChange={(option: any) => setBGOption(option)}
-					/>
-				</div>
-			</Preview>
-		</div>
-	)
+	return null
 }
 
 export default render(Plugin)

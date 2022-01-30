@@ -12,28 +12,36 @@ export const WINDOW_MAX_HEIGHT = 600
 /**
  * Performance
  */
-export const THROTTLE_SCENE_UPDATES = 60 // ms
+export const DEBOUNCE_CANVAS_UPDATES = 60 // ms
 
 /**
- * Casted shadow
+ * Light source
  */
-export const SHADOW_BASE_BLUR = 50
-export const SHADOW_BASE_OPACITY = 0.65
-
-export const LIGHT_SOURCE_SIZE = 32
+export const LIGHT_SIZE = 32
+export const LIGHT_INITIAL_POSITION = {
+	x: WINDOW_INITIAL_WIDTH / 2 - LIGHT_SIZE / 2,
+	y: (WINDOW_INITIAL_HEIGHT / 2 - LIGHT_SIZE / 2) / 2
+}
 export const LIGHT_INITIAL_BRIGHTNESS = 0.6 // value between 0-1
 export const LIGHT_MIN_BRIGHTNESS = 0.1 // value between 0-1
 
-export const TARGET_ELEVATION_DRAG_RANGE = 50 // Range in px it takes to drag from elevation 0 to 1
+/**
+ * Target element which casts the shadpw
+ */
 export const TARGET_INITIAL_ELEVATION = 0.5
 export const TARGET_MIN_ELEVATION = 0.025
 
 /**
- * Scene
+ * Background
  */
-export const SCENE_DEFAULT_BG_COLOR = '#e5e5e5'
+export const BACKGROUND_DEFAULT_COLOR = '#e5e5e5'
+
+/**
+ * Shadow
+ */
+export const SHADOW_BASE_BLUR = 50
 
 /**
  * Preview
  */
-export const PREVIEW_SNAP_ALIGN_TRESHOLD = 6 //px
+export const LIGHT_SNAP_TO_AXIS_TRESHOLD = 6 //px

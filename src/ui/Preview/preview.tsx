@@ -1,142 +1,80 @@
 import { h } from 'preact'
-import { useState, useRef, useEffect } from 'preact/hooks'
+import { forwardRef } from 'preact/compat'
+import useStore from '../../store/useStore'
+import { useEffect, useLayoutEffect } from 'preact/hooks'
 import usePreviewBounds, { PreviewBounds } from '../../hooks/usePreviewBounds'
-import { vecAngle, vecDistance } from '../../utils/math'
-import Target, { TargetValues } from './components/Target/target'
-import Light, { LightValues } from './components/Light/light'
+import {
+	angleFromLightToTarget,
+	distanceFromLightToTarget
+} from '../../utils/math'
+import Target from './components/Target/target'
+import Light from './components/Light'
 import ShowAlignmentLines from './components/ShowAlignmentLines/lines'
+import { BACKGROUND_DEFAULT_COLOR } from '../../constants'
 import styles from './preview.css'
 
-import {
-	TARGET_INITIAL_ELEVATION,
-	TARGET_MIN_ELEVATION,
-	TARGET_ELEVATION_DRAG_RANGE,
-	LIGHT_SOURCE_SIZE,
-	LIGHT_INITIAL_BRIGHTNESS
-} from '../../constants'
+// Types
+import { Preview } from '../../store/createPreview'
 
-/**
- * Types
- */
-import { SelectionParameters } from '../../main'
-interface PreviewProps {
-	canvasSelection: SelectionParameters
-	backgroundColor: string
-	children: any
-	onSceneChange: Function
-}
+const Preview = forwardRef<any>(({ children }: any, ref) => {
+	const { width, height }: PreviewBounds = usePreviewBounds(ref)
+	useLayoutEffect(() => {
+		setPreviewBounds({ width, height })
+	}, [width, height])
 
-export interface Scene {
-	azimuth: number
-	distance: number
-	elevation: number
-	brightness: number
-	backgroundColor: string
-}
-
-/**
- * Constants
- */
-
-const Preview = ({
-	canvasSelection,
-	backgroundColor,
-	children,
-	onSceneChange
-}: PreviewProps) => {
 	/**
-	 * Get bounds of the preview div.
-	 * The bounds are used to define the drag constraints for the light source,
-	 * and to calc the position of the shadow receiving target.
+	 * 💾 Store
 	 */
-	const previewRef = useRef<any>()
-	const { vw, vh }: PreviewBounds = usePreviewBounds(previewRef)
+	const { light, target, background, setPreview, setPreviewBounds } =
+		useStore((state: any) => ({
+			light: state.light,
+			target: state.target,
+			background: state.background,
+			setPreview: state.setPreview,
+			setPreviewBounds: state.setPreviewBounds
+		}))
+	const backgroundColor =
+		background.preference === 'NONE'
+			? BACKGROUND_DEFAULT_COLOR
+			: background.preference === 'AUTO'
+			? background.auto
+			: background.custom
 
 	/**
-	 * Scene components
-	 */
-	const [light, setLight] = useState<LightValues>({
-		x: 0,
-		y: 0,
-		alignment: 'NONE',
-		brightness: LIGHT_INITIAL_BRIGHTNESS,
-		pointerDown: false
-	})
-	const [target, setTarget] = useState<TargetValues>({
-		x: 0,
-		y: 0,
-		elevation: TARGET_INITIAL_ELEVATION
-	})
-	const [scene, setScene] = useState<Scene>({
-		azimuth: 0,
-		distance: 0,
-		elevation: TARGET_INITIAL_ELEVATION,
-		brightness: LIGHT_INITIAL_BRIGHTNESS,
-		backgroundColor
-	})
-
-	/**
-	 * Update scene when light or target changed
+	 * 👂 Listen for changes from the Light or Target component and update the preview
 	 */
 	useEffect(() => {
-		const _target = {
-			x: target.x - LIGHT_SOURCE_SIZE / 2,
-			y: target.y - LIGHT_SOURCE_SIZE / 2
-		} // assume that target is always centered
-		const _light = { x: light.x, y: light.y }
+		const targetPosition = {
+			x: target.x - light.size / 2,
+			y: target.y - light.size / 2
+		}
+		const lightPosition = { x: light.x, y: light.y }
+		const azimuth = angleFromLightToTarget(targetPosition, lightPosition)
+		const distance = distanceFromLightToTarget(
+			targetPosition,
+			lightPosition
+		)
+		const elevation = target.elevation
+		const brightness = light.brightness
 
-		const azimuth = vecAngle(_target, _light)
-		const distance = vecDistance(_light, _target)
-		const elevation = target?.elevation || 0
-		const brightness = light?.brightness || 0
-
-		const data = {
+		const update: Preview = {
 			azimuth,
 			distance,
 			elevation,
 			brightness,
 			backgroundColor
 		}
-		setScene(data)
-		onSceneChange(data)
-	}, [light, target, backgroundColor])
+		setPreview(update)
+	}, [light, target, background])
 
 	return (
-		<div
-			className={styles.container}
-			style={{ backgroundColor }}
-			ref={previewRef}>
-			<Target
-				preview={{ vw, vh }}
-				canvasSelection={canvasSelection}
-				scene={scene}
-				dragRange={TARGET_ELEVATION_DRAG_RANGE}
-				initElevation={TARGET_INITIAL_ELEVATION}
-				minElevation={TARGET_MIN_ELEVATION}
-				onTargetChange={(target: TargetValues) => setTarget(target)}
-			/>
-			<Light
-				preview={{ vw, vh }}
-				size={LIGHT_SOURCE_SIZE}
-				bounds={previewRef}
-				onPositionChange={(light: LightValues) =>
-					setLight((prev) => ({ ...prev, ...light }))
-				}
-				onBrightnessChange={(brightness: number) =>
-					setLight((prev) => ({ ...prev, brightness }))
-				}
-			/>
-			<ShowAlignmentLines
-				visible={light.pointerDown}
-				preview={{ vw, vh }}
-				x={light.x}
-				y={light.y}
-				alignment={light.alignment}
-				offset={LIGHT_SOURCE_SIZE / 2}
-			/>
+		<div ref={ref} className={styles.preview} style={{ backgroundColor }}>
+			<Target />
+			<Light />
+			<ShowAlignmentLines />
 			{children}
 		</div>
 	)
-}
+})
 
 export default Preview
