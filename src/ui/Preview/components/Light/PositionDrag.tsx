@@ -94,19 +94,19 @@ const PositionDrag = ({ children, ...rest }: { children: any }) => {
 	}, [azimuth, distance])
 
 	// Keep light in bounds when window is resized
-	// useEffect(() => {
-	// 	const { width, height } = previewBounds
-	// 	if (!width || !height) return
-	// 	const OOBx = x.get() > width - size
-	// 	const OOBy = y.get() > height - size
-	// 	let position
-	// 	const padding = 8
-	// 	if (OOBx && OOBy)
-	// 		position = { x: width - size - padding, y: height - size - padding }
-	// 	else if (OOBx) position = { x: width - size - padding }
-	// 	else if (OOBy) position = { y: height - size - padding }
-	// 	// if (position) setLight(position)
-	// }, [previewBounds])
+	useEffect(() => {
+		const { width, height } = previewBounds
+		if (!width || !height) return
+		const OOBx = x.get() > width - size
+		const OOBy = y.get() > height - size
+		let position
+		const padding = 8
+		if (OOBx && OOBy)
+			position = { x: width - size - padding, y: height - size - padding }
+		else if (OOBx) position = { x: width - size - padding }
+		else if (OOBy) position = { y: height - size - padding }
+		if (position) setLight(position)
+	}, [previewBounds])
 
 	return (
 		<animated.div

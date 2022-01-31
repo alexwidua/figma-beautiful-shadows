@@ -30,6 +30,7 @@ const useElevationSlider = () => {
 	const [{ scale }, animate] = useSpring(() => ({ scale: 1 }))
 	const slide = useDrag(
 		({ down: elevationPointerDown, shiftKey, offset: [_, oy] }) => {
+			console.log(oy)
 			const value = shiftKey ? oy : stepped(oy, 10)
 			const normalized = normalize(value, DRAG_RANGE, -DRAG_RANGE)
 
@@ -40,11 +41,7 @@ const useElevationSlider = () => {
 			setTarget(data)
 		},
 		{
-			bounds: { top: -DRAG_RANGE, bottom: DRAG_RANGE },
-			from: () => [
-				TARGET_INITIAL_ELEVATION + TARGET_MIN_ELEVATION * DRAG_RANGE,
-				TARGET_INITIAL_ELEVATION + TARGET_MIN_ELEVATION * DRAG_RANGE
-			]
+			bounds: { top: -DRAG_RANGE, bottom: DRAG_RANGE }
 		}
 	)
 
