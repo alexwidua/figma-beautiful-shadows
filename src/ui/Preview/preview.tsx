@@ -18,7 +18,7 @@ import { Preview } from '../../store/createPreview'
 
 const Preview = forwardRef<any>(({ children }: any, ref) => {
 	const { width, height }: PreviewBounds = usePreviewBounds(ref)
-	useLayoutEffect(() => {
+	useEffect(() => {
 		setPreviewBounds({ width, height })
 	}, [width, height])
 
@@ -26,7 +26,7 @@ const Preview = forwardRef<any>(({ children }: any, ref) => {
 	 * 💾 Store
 	 */
 	const { light, target, background, setPreview, setPreviewBounds } =
-		useStore((state: any) => ({
+		useStore((state) => ({
 			light: state.light,
 			target: state.target,
 			background: state.background,

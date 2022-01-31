@@ -1,5 +1,5 @@
 import { h } from 'preact'
-import useStore from '../../store/useStore'
+import useStore from '../../../store/useStore'
 import { useState, useEffect, useRef } from 'preact/hooks'
 import { useDrag } from '@use-gesture/react'
 import { useSpring, animated } from '@react-spring/web'

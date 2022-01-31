@@ -1,4 +1,4 @@
-import { clamp, normalize } from './math'
+import { clamp, normalize, degreeToRadian } from './math'
 import { easeQuadOut } from 'd3-ease'
 import chroma from 'chroma-js'
 import { SHADOW_BASE_BLUR } from '../constants'
@@ -26,7 +26,8 @@ export function getCastedShadows({
 	const { width, height } = size
 	const longestSide = Math.max(width, height)
 	const factor = longestSide / 100
-	const relDistance = distance * factor
+	const relativeDistance = distance * factor
+	const azimuthRad = degreeToRadian(azimuth)
 
 	// apply tinted shadow if bg color is supplied
 	// s/o to https://www.joshwcomeau.com/css/designing-shadows/
@@ -47,7 +48,7 @@ export function getCastedShadows({
 		{ length: smoothness },
 		(_, i) => {
 			const step = easeQuadOut(normalize(i, 0, smoothness))
-			const blurShadowWithDistance = Math.max(relDistance / 100, 0.8) // values are purely based on gut feel
+			const blurShadowWithDistance = Math.max(relativeDistance / 100, 0.8) // values are purely based on gut feel
 			return {
 				type: 'DROP_SHADOW',
 				blendMode: 'NORMAL',
@@ -59,8 +60,12 @@ export function getCastedShadows({
 					a: brightness - brightness * step
 				},
 				offset: {
-					x: Math.cos(azimuth) * (relDistance * elevation * step),
-					y: Math.sin(azimuth) * (relDistance * elevation * step)
+					x:
+						Math.cos(azimuthRad) *
+						(relativeDistance * elevation * step),
+					y:
+						Math.sin(azimuthRad) *
+						(relativeDistance * elevation * step)
 				},
 				radius:
 					SHADOW_BASE_BLUR *

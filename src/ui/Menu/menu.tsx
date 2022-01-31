@@ -8,7 +8,7 @@ import {
 	IconButton,
 	IconAdjust32
 } from '@create-figma-plugin/ui'
-import OptionsPanel from './../OptionsPanel'
+import OptionsPanel from './OptionsPanel'
 import styles from './menu.css'
 
 const Menu = ({ bounds }: any) => {
@@ -44,7 +44,9 @@ const Menu = ({ bounds }: any) => {
 				<Button
 					style={{ minWidth: 96 }}
 					disabled={selection.valid !== 'VALID'}
-					onClick={applyShadowsToSelectedCanvasElement}>
+					onClick={applyShadowsToSelectedCanvasElement}
+					//@ts-ignore next-line
+					style={{ opacity: selection.valid !== 'VALID' ? 0.5 : 1 }}>
 					Apply
 				</Button>
 			</Columns>

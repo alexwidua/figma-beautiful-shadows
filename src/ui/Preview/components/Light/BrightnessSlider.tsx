@@ -30,12 +30,13 @@ const BrightnessSlider = ({ children }: { children: any }) => {
 	 * 💾 Store
 	 */
 	const { brightness, positionPointerDown, brightnessPointerDown, setLight } =
-		useStore((state: any) => ({
+		useStore((state) => ({
 			brightness: state.light.brightness,
 			positionPointerDown: state.light.positionPointerDown,
 			brightnessPointerDown: state.light.brightnessPointerDown,
 			setLight: state.setLight
 		}))
+
 	const [{ y, opacity, translateSunRays, sunRayWidth }, animateSlider] =
 		useSpring(() => ({
 			y: brightnessDragMax * LIGHT_INITIAL_BRIGHTNESS,

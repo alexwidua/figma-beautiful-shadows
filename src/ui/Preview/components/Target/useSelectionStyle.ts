@@ -17,7 +17,7 @@ const useSelectionStyle = () => {
 		width: number
 		height: number
 		cornerRadius: number
-	} = useStore((state: any) => ({
+	} = useStore((state) => ({
 		valid: state.selection.valid,
 		width: state.selection.width,
 		height: state.selection.height,

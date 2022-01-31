@@ -17,14 +17,21 @@ const PositionDrag = ({ children, ...rest }: { children: any }) => {
 	/**
 	 * 💾 Store
 	 */
-	const { previewBounds, size, position, positionPointerDown, setLight } =
-		useStore((state: any) => ({
-			previewBounds: state.previewBounds,
-			size: state.light.size,
-			position: { x: state.light.x, y: state.light.y },
-			positionPointerDown: state.light.positionPointerDown,
-			setLight: state.setLight
-		}))
+	const {
+		previewBounds,
+		azimuth,
+		distance,
+		size,
+		positionPointerDown,
+		setLight
+	} = useStore((state) => ({
+		previewBounds: state.previewBounds,
+		azimuth: state.preview.azimuth,
+		distance: state.preview.distance,
+		size: state.light.size,
+		positionPointerDown: state.light.positionPointerDown,
+		setLight: state.setLight
+	}))
 
 	/**
 	 * ✋ Handle drag gesture and translation
@@ -66,30 +73,40 @@ const PositionDrag = ({ children, ...rest }: { children: any }) => {
 	)
 
 	/**
-	 * 👂 Listen for position changes and fire queue translation
+	 * 👂 Listen for azimuth changes and update position.
+	 *
+	 * Instead of listening to position updates and take the raw X and Y value,
+	 * we listen to azimuth changes and derive the x and y value.
+	 * This allows us to adjust the x and y position externally by just changing the azimuth value.
 	 */
 	useEffect(() => {
+		const theta = azimuth * (Math.PI / 180)
+		const dx = distance * Math.cos(theta)
+		const dy = distance * Math.sin(theta)
+		const adjustedX = previewBounds.width / 2 - size / 2 - dx
+		const adjustedY = previewBounds.height / 2 - size / 2 - dy
+
 		animateLightPosition.start({
-			x: position.x,
-			y: position.y,
+			x: adjustedX,
+			y: adjustedY,
 			immediate: positionPointerDown
 		})
-	}, [position])
+	}, [azimuth, distance])
 
 	// Keep light in bounds when window is resized
-	useEffect(() => {
-		const { width, height } = previewBounds
-		if (!width || !height) return
-		const OOBx = x.get() > width - size
-		const OOBy = y.get() > height - size
-		let position
-		const padding = 8
-		if (OOBx && OOBy)
-			position = { x: width - size - padding, y: height - size - padding }
-		else if (OOBx) position = { x: width - size - padding }
-		else if (OOBy) position = { y: height - size - padding }
-		if (position) setLight(position)
-	}, [previewBounds])
+	// useEffect(() => {
+	// 	const { width, height } = previewBounds
+	// 	if (!width || !height) return
+	// 	const OOBx = x.get() > width - size
+	// 	const OOBy = y.get() > height - size
+	// 	let position
+	// 	const padding = 8
+	// 	if (OOBx && OOBy)
+	// 		position = { x: width - size - padding, y: height - size - padding }
+	// 	else if (OOBx) position = { x: width - size - padding }
+	// 	else if (OOBy) position = { y: height - size - padding }
+	// 	// if (position) setLight(position)
+	// }, [previewBounds])
 
 	return (
 		<animated.div

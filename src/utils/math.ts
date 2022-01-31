@@ -14,14 +14,24 @@ export function denormalize(value: number, min: number, max: number): number {
 	return value * (max - min) + min
 }
 
+export function percent(value: number, round: boolean = true) {
+	return round ? Math.round(value * 100) : value * 100
+}
+
 export function angleFromLightToTarget(vec1: Vector, vec2: Vector): number {
-	return Math.atan2(vec1.y - vec2.y, vec1.x - vec2.x)
+	const deg = Math.atan2(vec1.y - vec2.y, vec1.x - vec2.x) * (180 / Math.PI)
+	return deg < 0 ? 360 + deg : deg
 }
 
 export function distanceFromLightToTarget(vec1: Vector, vec2: Vector): number {
 	const p1 = vec1.x - vec2.x
 	const p2 = vec1.y - vec2.y
+	//return (Math.sqrt(p1 * p1 + p2 * p2) * 180) / Math.PI
 	return Math.sqrt(p1 * p1 + p2 * p2)
+}
+
+export function degreeToRadian(degree: number) {
+	return degree * (Math.PI / 180)
 }
 
 export function resizeAndRetainAspectRatio(

@@ -12,12 +12,12 @@ import { TARGET_MIN_ELEVATION } from '../../../../constants'
 // Types
 import { Target } from '../../../../store/createTarget'
 
-const Target = ({ ...rest }: any) => {
+const Target = ({ ...rest }) => {
 	/**
 	 * 💾 Store
 	 */
 	const { previewBounds, elevation, elevationPointerDown, setTarget } =
-		useStore((state: any) => ({
+		useStore((state) => ({
 			previewBounds: state.previewBounds,
 			elevation: state.target.elevation,
 			elevationPointerDown: state.target.elevationPointerDown,
@@ -37,8 +37,8 @@ const Target = ({ ...rest }: any) => {
 	const x = previewBounds.width / 2
 	const y = previewBounds.height / 2
 	useEffect(() => {
-		const update: Partial<Target> = { x, y }
-		setTarget(update)
+		const data: Partial<Target> = { x, y }
+		setTarget(data)
 	}, [x, y])
 
 	return (

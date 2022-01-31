@@ -17,7 +17,7 @@ const useElevationSlider = () => {
 	 * 💾 Store
 	 */
 	const { elevation, elevationPointerDown, setTarget } = useStore(
-		(state: any) => ({
+		(state) => ({
 			elevation: state.target.elevation,
 			elevationPointerDown: state.target.elevationPointerDown,
 			setTarget: state.setTarget
@@ -62,6 +62,7 @@ const useElevationSlider = () => {
 			immediate: elevationPointerDown
 		})
 	}, [elevation])
+
 	return [scale, slide]
 }
 

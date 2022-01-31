@@ -15,7 +15,7 @@ export type Preview = {
 }
 export interface PreviewState {
 	preview: Preview
-	setPreview: (arg: PreviewState) => void
+	setPreview: (arg: Preview | Partial<Preview>) => void
 }
 
 const createPreview = (set: SetState<Store>) => ({
@@ -26,7 +26,7 @@ const createPreview = (set: SetState<Store>) => ({
 		brightness: LIGHT_INITIAL_BRIGHTNESS,
 		backgroundColor: BACKGROUND_DEFAULT_COLOR
 	},
-	setPreview: (preview: PreviewState) =>
+	setPreview: (preview: Preview | Partial<Preview>) =>
 		set((state) => ({ preview: { ...state.preview, ...preview } }))
 })
 

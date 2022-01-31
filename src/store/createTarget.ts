@@ -10,7 +10,7 @@ export type Target = {
 }
 export interface TargetState {
 	target: Target
-	setTarget: (arg: TargetState) => void
+	setTarget: (arg: TargetState | Partial<Target>) => void
 }
 
 const createTarget = (set: SetState<Store>) => ({
@@ -20,7 +20,7 @@ const createTarget = (set: SetState<Store>) => ({
 		elevation: TARGET_INITIAL_ELEVATION,
 		elevationPointerDown: false
 	},
-	setTarget: (target: TargetState) =>
+	setTarget: (target: TargetState | Partial<Target>) =>
 		set((state) => ({ target: { ...state.target, ...target } }))
 })
 

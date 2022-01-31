@@ -18,7 +18,7 @@ export type Light = {
 }
 export interface LightState {
 	light: Light
-	setLight: (arg: LightState) => void
+	setLight: (arg: LightState | Partial<Light>) => void
 }
 
 const createLight = (set: SetState<Store>) => ({
@@ -31,7 +31,7 @@ const createLight = (set: SetState<Store>) => ({
 		positionPointerDown: false,
 		brightnessPointerDown: false
 	},
-	setLight: (light: LightState) =>
+	setLight: (light: LightState | Partial<Light>) =>
 		set((state) => ({
 			light: { ...state.light, ...light }
 		}))

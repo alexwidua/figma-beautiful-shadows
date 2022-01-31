@@ -4,6 +4,7 @@ import { PreviewBounds } from '../hooks/usePreviewBounds'
 
 export interface PreviewBoundsState {
 	previewBounds: PreviewBounds
+	setPreviewBounds: (args: PreviewBounds) => void
 }
 
 const createPreviewBounds = (set: SetState<Store>) => ({

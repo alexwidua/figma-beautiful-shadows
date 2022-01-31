@@ -1,12 +1,12 @@
 import { h, Fragment, JSX } from 'preact'
-import useStore from '../../../store/useStore'
+import useStore from '../../../../store/useStore'
 import { useState } from 'preact/hooks'
 import chroma from 'chroma-js'
 import { Text, Textbox, SegmentedControl } from '@create-figma-plugin/ui'
-import { BACKGROUND_DEFAULT_COLOR } from '../../../constants'
+import { BACKGROUND_DEFAULT_COLOR } from '../../../../constants'
 
 //Types
-import { BackgroundPreference } from '../../../store/createBackground'
+import { BackgroundPreference } from '../../../../store/createBackground'
 type BackgroundOption = { value: BackgroundPreference; children: any }
 
 const SetBackgroundColor = () => {

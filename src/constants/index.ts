@@ -6,8 +6,8 @@ export const WINDOW_INITIAL_WIDTH = 375
 export const WINDOW_INITIAL_HEIGHT = 375
 export const WINDOW_MIN_WIDTH = 340
 export const WINDOW_MIN_HEIGHT = 340
-export const WINDOW_MAX_WIDTH = 3600
-export const WINDOW_MAX_HEIGHT = 600
+export const WINDOW_MAX_WIDTH = 900
+export const WINDOW_MAX_HEIGHT = 900
 
 /**
  * Performance
