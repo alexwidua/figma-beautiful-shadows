@@ -5,7 +5,7 @@ import { emit, on } from '@create-figma-plugin/utilities'
 import { useWindowResize, render } from '@create-figma-plugin/ui'
 import { debounce } from './utils/debounce'
 import chroma from 'chroma-js'
-import Preview from './ui/Preview/preview'
+import PreviewEditor from './ui/Preview/preview'
 import Menu from './ui/Menu/menu'
 import {
 	DEBOUNCE_CANVAS_UPDATES,
@@ -17,17 +17,21 @@ import {
 } from './constants'
 
 // Types
+import { Preview } from './store/createPreview'
 import { Selection } from './store/createSelection'
 import { Background } from './store/createBackground'
 
 const Plugin = () => {
 	const bounds = useRef<any>()
 	makePluginResizeable()
-	const { preview, setBackground, setSelection } = useStore((state: any) => ({
-		preview: state.preview,
-		setBackground: state.setBackground,
-		setSelection: state.setSelection
-	}))
+	const { preview, setBackground, setSelection, setPreview } = useStore(
+		(state) => ({
+			preview: state.preview,
+			setBackground: state.setBackground,
+			setSelection: state.setSelection,
+			setPreview: state.setPreview
+		})
+	)
 
 	/**
 	 * ✉️ Emit preview update TO plugin (main.ts)
@@ -52,6 +56,7 @@ const Plugin = () => {
 	useEffect(() => {
 		on('DERIVED_BACKGROUND_COLOR_FROM_CANVAS', updateDerivedBackgroundColor)
 		on('SELECTION_CHANGE', updateSelection)
+		on('LOAD_EXISTING_SHADOW_DATA', (data: Preview) => setPreview(data))
 	}, [])
 
 	const updateSelection = useCallback((selection: Selection) => {
@@ -75,9 +80,9 @@ const Plugin = () => {
 	)
 
 	return (
-		<Preview ref={bounds}>
+		<PreviewEditor ref={bounds}>
 			<Menu bounds={bounds} />
-		</Preview>
+		</PreviewEditor>
 	)
 }
 

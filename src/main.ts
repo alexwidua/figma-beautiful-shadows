@@ -8,6 +8,8 @@ import { WINDOW_INITIAL_WIDTH, WINDOW_INITIAL_HEIGHT } from './constants'
 import { Preview } from './store/createPreview'
 import { Selection } from './store/createSelection'
 
+const PLUGIN_DATA_KEY = 'beautiful_shadow'
+
 export default function () {
 	/**
 	 * The preview variable holds all shadow information.
@@ -41,6 +43,18 @@ export default function () {
 		'TEXT',
 		'VECTOR'
 	]
+
+	/**
+	 * Check if node has previously set shadow data and load
+	 */
+	function checkIfExistingShadowData() {
+		if (!nodeRef) return
+		const pluginData = nodeRef.getPluginData(PLUGIN_DATA_KEY)
+		if (pluginData) {
+			const data: Preview = JSON.parse(pluginData)
+			emit('LOAD_EXISTING_SHADOW_DATA', data)
+		}
+	}
 
 	/**
 	 * Handle selection change.
@@ -139,7 +153,12 @@ export default function () {
 	 */
 	figma.on('selectionchange', handleSelectionChange)
 	figma.on('close', function () {
-		if (!APPLIED_SHADOW_EFFECTS) cleanUpAndRestorePrevEffects()
+		if (APPLIED_SHADOW_EFFECTS) {
+			nodeRef.setPluginData(PLUGIN_DATA_KEY, JSON.stringify(preview))
+			nodeRef.setRelaunchData({
+				editShadow: `Edit the shadow effect with Beautiful Shadows`
+			})
+		} else cleanUpAndRestorePrevEffects()
 	})
 
 	/**
@@ -167,4 +186,5 @@ export default function () {
 		height: WINDOW_INITIAL_HEIGHT
 	})
 	handleSelectionChange() // emit selection to UI on plugin startup
+	checkIfExistingShadowData()
 }

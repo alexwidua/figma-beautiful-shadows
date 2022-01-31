@@ -32,7 +32,14 @@
 		"id": "1068595505353552645",
 		"name": "Beautiful Shadows",
 		"main": "src/main.ts",
-		"ui": "src/ui.tsx"
+		"ui": "src/ui.tsx",
+		"relaunchButtons": {
+			"editShadow": {
+				"name": "Edit shadow",
+				"main": "src/main.ts",
+				"ui": "src/ui.tsx"
+			}
+		}
 	},
 	"stylelint": {
 		"extends": "stylelint-config-idiomatic-order"

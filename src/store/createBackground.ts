@@ -11,7 +11,7 @@ export type Background = {
 
 export interface BackgroundState {
 	background: Background
-	setBackground: (arg: BackgroundState) => void
+	setBackground: (arg: BackgroundState | Partial<Background>) => void
 }
 
 const createBackground = (set: SetState<Store>) => ({
@@ -20,7 +20,7 @@ const createBackground = (set: SetState<Store>) => ({
 		auto: BACKGROUND_DEFAULT_COLOR,
 		preference: 'AUTO' as BackgroundPreference
 	},
-	setBackground: (background: BackgroundState) =>
+	setBackground: (background: BackgroundState | Partial<Background>) =>
 		set((state) => ({
 			background: { ...state.background, ...background }
 		}))
