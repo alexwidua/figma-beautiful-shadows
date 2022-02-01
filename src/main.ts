@@ -9,6 +9,25 @@ import { Preview } from './store/createPreview'
 import { Selection } from './store/createSelection'
 
 const PLUGIN_DATA_KEY = 'beautiful_shadow'
+const VALID_NODE_TYPES: Array<NodeType> = [
+	'BOOLEAN_OPERATION',
+	'COMPONENT',
+	'ELLIPSE',
+	'FRAME',
+	'GROUP',
+	'LINE',
+	'POLYGON',
+	'RECTANGLE',
+	'STAR',
+	'TEXT',
+	'VECTOR'
+]
+
+type ErrorMessage = { [type in SelectionValidity]: string }
+const ERROR_MSG: Pick<ErrorMessage, 'MULTIPLE' | 'INVALID'> = {
+	MULTIPLE: 'Select only one element or group elements together.',
+	INVALID: 'Element type not supported.'
+}
 
 export default function () {
 	/**
@@ -29,20 +48,6 @@ export default function () {
 	 * The APPLIED_SHADOW_EFFECTS flag skips this step to apply the changes.
 	 */
 	let APPLIED_SHADOW_EFFECTS: true | undefined
-
-	const validNodeTypes: Array<NodeType> = [
-		'BOOLEAN_OPERATION',
-		'COMPONENT',
-		'ELLIPSE',
-		'FRAME',
-		'GROUP',
-		'LINE',
-		'POLYGON',
-		'RECTANGLE',
-		'STAR',
-		'TEXT',
-		'VECTOR'
-	]
 
 	/**
 	 * Check if node has previously set shadow data and load
@@ -69,20 +74,21 @@ export default function () {
 		const selection = figma.currentPage.selection
 		const valid: SelectionValidity = validateSelection(
 			selection,
-			validNodeTypes
+			VALID_NODE_TYPES
 		)
 		if (valid === 'EMPTY') {
 			cleanUpAndRestorePrevEffects()
-		} else if (valid === 'MULTIPLE') {
-			figma.notify('Select only one element or group elements together.')
-		} else if (valid === 'INVALID') {
-			figma.notify('Element type not supported.')
+		} else if (valid === 'MULTIPLE' || valid === 'INVALID') {
+			cleanUpAndRestorePrevEffects()
+			figma.notify(ERROR_MSG[valid])
 		} else if (valid === 'VALID') {
 			if (nodeRef) cleanUpAndRestorePrevEffects()
 			nodeRef = selection[0]
+			checkIfExistingShadowData()
 			existingNodeEffects = nodeRef.effects
 			drawShadows()
 		}
+		if (nodeRef?.removed) return
 		tryToDeriveBGColorFromCanvas(valid !== 'VALID')
 		const data: Selection = {
 			valid,
@@ -98,6 +104,8 @@ export default function () {
 	 * Try to 'derive' a background color by searching for a node that encloses the selected node.
 	 */
 	function tryToDeriveBGColorFromCanvas(skip: boolean): void {
+		if (nodeRef?.removed) return
+		if (!nodeRef) return
 		let color: SolidPaint | undefined
 
 		if (!skip) {
@@ -118,6 +126,7 @@ export default function () {
 	 * Draw shadows ☀️
 	 */
 	function drawShadows(): void {
+		if (nodeRef?.removed) return
 		if (!nodeRef || !preview) return
 
 		const { azimuth, distance, elevation, brightness, backgroundColor } =
@@ -143,6 +152,7 @@ export default function () {
 	}
 
 	function cleanUpAndRestorePrevEffects(): void {
+		if (nodeRef?.removed) return
 		if (nodeRef) nodeRef.effects = existingNodeEffects
 		nodeRef = undefined
 		existingNodeEffects = undefined
@@ -186,5 +196,4 @@ export default function () {
 		height: WINDOW_INITIAL_HEIGHT
 	})
 	handleSelectionChange() // emit selection to UI on plugin startup
-	checkIfExistingShadowData()
 }
