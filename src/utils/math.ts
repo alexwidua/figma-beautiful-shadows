@@ -30,6 +30,16 @@ export function distanceFromLightToTarget(vec1: Vector, vec2: Vector): number {
 	return Math.sqrt(p1 * p1 + p2 * p2)
 }
 
+export function deriveXYFromAngle(
+	angle: number,
+	distance: number
+): { dx: number; dy: number } {
+	const theta = angle * (Math.PI / 180)
+	const dx = distance * Math.cos(theta)
+	const dy = distance * Math.sin(theta)
+	return { dx, dy }
+}
+
 export function degreeToRadian(degree: number) {
 	return degree * (Math.PI / 180)
 }

@@ -1,7 +1,7 @@
 import { h, JSX } from 'preact'
 import useStore from '../../../../store/useStore'
 import { useState, useEffect } from 'preact/hooks'
-import { percent, clamp } from '../../../../utils/math'
+import { percent, clamp, deriveXYFromAngle } from '../../../../utils/math'
 import { TextboxNumeric } from '@create-figma-plugin/ui'
 import styles from './parameters.css'
 
@@ -44,8 +44,11 @@ const Parameters = () => {
 		if (value === null) return null
 		const valid = value >= 0 && value <= 360
 		if (valid) {
-			const data: Pick<Preview, 'azimuth'> = { azimuth: value }
-			setPreview(data)
+			const { dx, dy } = deriveXYFromAngle(value, distance)
+			const adjustedX = previewBounds.width / 2 - lightSize / 2 - dx
+			const adjustedY = previewBounds.height / 2 - lightSize / 2 - dy
+			const data: Pick<Light, 'x' | 'y'> = { x: adjustedX, y: adjustedY }
+			setLight(data)
 		}
 		return valid
 	}

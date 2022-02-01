@@ -12,7 +12,7 @@ export const WINDOW_MAX_HEIGHT = 900
 /**
  * Performance
  */
-export const DEBOUNCE_CANVAS_UPDATES = 60 // ms
+export const DEBOUNCE_CANVAS_UPDATES = 10 // ms
 
 /**
  * Light source
@@ -26,7 +26,7 @@ export const LIGHT_INITIAL_BRIGHTNESS = 0.6 // value between 0-1
 export const LIGHT_MIN_BRIGHTNESS = 0.1 // value between 0-1
 
 /**
- * Target element which casts the shadpw
+ * Target element which casts the shadow
  */
 export const TARGET_INITIAL_ELEVATION = 0.5
 export const TARGET_MIN_ELEVATION = 0.025

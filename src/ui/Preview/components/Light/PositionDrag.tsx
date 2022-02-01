@@ -20,6 +20,7 @@ const PositionDrag = ({ children, ...rest }: { children: any }) => {
 	const {
 		previewBounds,
 		azimuth,
+		position,
 		distance,
 		size,
 		positionPointerDown,
@@ -27,6 +28,7 @@ const PositionDrag = ({ children, ...rest }: { children: any }) => {
 	} = useStore((state) => ({
 		previewBounds: state.previewBounds,
 		azimuth: state.preview.azimuth,
+		position: { x: state.light.x, y: state.light.y },
 		distance: state.preview.distance,
 		size: state.light.size,
 		positionPointerDown: state.light.positionPointerDown,
@@ -74,24 +76,14 @@ const PositionDrag = ({ children, ...rest }: { children: any }) => {
 
 	/**
 	 * 👂 Listen for azimuth changes and update position.
-	 *
-	 * Instead of listening to position updates and take the raw X and Y value,
-	 * we listen to azimuth changes and derive the x and y value.
-	 * This allows us to adjust the x and y position externally by just changing the azimuth value.
 	 */
 	useEffect(() => {
-		const theta = azimuth * (Math.PI / 180)
-		const dx = distance * Math.cos(theta)
-		const dy = distance * Math.sin(theta)
-		const adjustedX = previewBounds.width / 2 - size / 2 - dx
-		const adjustedY = previewBounds.height / 2 - size / 2 - dy
-
 		animateLightPosition.start({
-			x: adjustedX,
-			y: adjustedY,
+			x: position.x,
+			y: position.y,
 			immediate: positionPointerDown
 		})
-	}, [azimuth, distance])
+	}, [position])
 
 	// Keep light in bounds when window is resized
 	useEffect(() => {

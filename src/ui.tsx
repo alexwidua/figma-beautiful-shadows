@@ -4,11 +4,14 @@ import { useRef, useEffect, useCallback } from 'preact/hooks'
 import { emit, on } from '@create-figma-plugin/utilities'
 import { useWindowResize, render } from '@create-figma-plugin/ui'
 import { debounce } from './utils/debounce'
+import { deriveXYFromAngle } from './utils/math'
 import chroma from 'chroma-js'
 import PreviewEditor from './ui/Preview/preview'
 import Menu from './ui/Menu/menu'
 import {
 	DEBOUNCE_CANVAS_UPDATES,
+	WINDOW_INITIAL_WIDTH,
+	WINDOW_INITIAL_HEIGHT,
 	WINDOW_MIN_WIDTH,
 	WINDOW_MAX_WIDTH,
 	WINDOW_MIN_HEIGHT,
@@ -17,21 +20,32 @@ import {
 } from './constants'
 
 // Types
-import { Preview } from './store/createPreview'
-import { Selection } from './store/createSelection'
+import { Light } from './store/createLight'
+import { Target } from './store/createTarget'
 import { Background } from './store/createBackground'
+import { Selection } from './store/createSelection'
+import { Preview } from './store/createPreview'
 
 const Plugin = () => {
 	const bounds = useRef<any>()
 	makePluginResizeable()
-	const { preview, setBackground, setSelection, setPreview } = useStore(
-		(state) => ({
-			preview: state.preview,
-			setBackground: state.setBackground,
-			setSelection: state.setSelection,
-			setPreview: state.setPreview
-		})
-	)
+	const {
+		preview,
+		previewBounds,
+		light,
+		setLight,
+		setTarget,
+		setBackground,
+		setSelection
+	} = useStore((state) => ({
+		preview: state.preview,
+		previewBounds: state.previewBounds,
+		light: state.light,
+		setLight: state.setLight,
+		setTarget: state.setTarget,
+		setBackground: state.setBackground,
+		setSelection: state.setSelection
+	}))
 
 	/**
 	 * ✉️ Emit preview update TO plugin (main.ts)
@@ -50,13 +64,30 @@ const Plugin = () => {
 	/**
 	 * 👂 Listen for changes FROM plugin (main.ts)
 	 *
+	 * · See if the selected element has shadows from an earlier sessions and if yes, update the preview with said values
 	 * · Listen for selection updates and style the target element respectively
 	 * · See if a background color can be derived from the canvas (by checking nodes that intersect with selection)
 	 */
 	useEffect(() => {
 		on('DERIVED_BACKGROUND_COLOR_FROM_CANVAS', updateDerivedBackgroundColor)
 		on('SELECTION_CHANGE', updateSelection)
-		on('LOAD_EXISTING_SHADOW_DATA', (data: Preview) => setPreview(data))
+		on('LOAD_EXISTING_SHADOW_DATA', restorePreviousShadow)
+	}, [])
+
+	const restorePreviousShadow = useCallback((preview: Preview) => {
+		const { azimuth, distance, brightness, elevation } = preview
+		const { dx, dy } = deriveXYFromAngle(azimuth, distance)
+		// at this point, previewBounds hasnt been updated so we use the initial window values because we can safely assume that the window hasn't been resized
+		const adjustedX = WINDOW_INITIAL_WIDTH / 2 - light.size / 2 - dx
+		const adjustedY = WINDOW_INITIAL_HEIGHT / 2 - light.size / 2 - dy
+		const lightData: Pick<Light, 'x' | 'y' | 'brightness'> = {
+			x: adjustedX,
+			y: adjustedY,
+			brightness
+		}
+		setLight(lightData)
+		const targetData: Pick<Target, 'elevation'> = { elevation }
+		setTarget(targetData)
 	}, [])
 
 	const updateSelection = useCallback((selection: Selection) => {
