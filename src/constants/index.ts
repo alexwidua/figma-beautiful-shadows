@@ -20,9 +20,9 @@ export const DEBOUNCE_CANVAS_UPDATES = 10 // ms
 export const LIGHT_SIZE = 32
 export const LIGHT_INITIAL_POSITION = {
 	x: WINDOW_INITIAL_WIDTH / 2 - LIGHT_SIZE / 2,
-	y: (WINDOW_INITIAL_HEIGHT / 2 - LIGHT_SIZE / 2) / 2
+	y: 124
 }
-export const LIGHT_INITIAL_BRIGHTNESS = 0.6 // value between 0-1
+export const LIGHT_INITIAL_BRIGHTNESS = 0.2 // value between 0-1
 export const LIGHT_MIN_BRIGHTNESS = 0.1 // value between 0-1
 
 /**
