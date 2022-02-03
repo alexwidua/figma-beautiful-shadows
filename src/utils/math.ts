@@ -14,8 +14,8 @@ export function denormalize(value: number, min: number, max: number): number {
 	return value * (max - min) + min
 }
 
-export function percent(value: number, round: boolean = true) {
-	return round ? Math.round(value * 100) : value * 100
+export function percent(value: number, roundValue: boolean = true) {
+	return roundValue ? Math.round(value * 100) : value * 100
 }
 
 export function angleFromLightToTarget(vec1: Vector, vec2: Vector): number {
@@ -56,4 +56,12 @@ export function resizeAndRetainAspectRatio(
 		height: ogHeight * ratio,
 		ratio
 	}
+}
+
+export function dottedGridOffset(viewport: number, gridSize: number): number {
+	const howMuchDotsFitIntoViewport = viewport / gridSize
+	const getPositionOfMostCenterDot =
+		(howMuchDotsFitIntoViewport / 2) * gridSize
+	const shift = viewport - getPositionOfMostCenterDot - gridSize / 2
+	return shift % gridSize
 }

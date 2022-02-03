@@ -15,6 +15,7 @@ export type Light = {
 	alignment: Alignment
 	positionPointerDown: boolean
 	brightnessPointerDown: boolean
+	shiftKeyDown: boolean
 }
 export interface LightState {
 	light: Light
@@ -29,7 +30,8 @@ const createLight = (set: SetState<Store>) => ({
 		brightness: LIGHT_INITIAL_BRIGHTNESS,
 		alignment: 'NONE' as Alignment,
 		positionPointerDown: false,
-		brightnessPointerDown: false
+		brightnessPointerDown: false,
+		shiftKeyDown: false
 	},
 	setLight: (light: LightState | Partial<Light>) =>
 		set((state) => ({

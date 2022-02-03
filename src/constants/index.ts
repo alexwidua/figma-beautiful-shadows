@@ -45,3 +45,5 @@ export const SHADOW_BASE_BLUR = 50
  * Preview
  */
 export const LIGHT_SNAP_TO_AXIS_TRESHOLD = 6 //px
+export const GRID_SIZE = 32
+export const GRID_OPACITY = 0.4

@@ -4,14 +4,10 @@ export default function align(
 	y: number,
 	alignX: number,
 	alignY: number,
-	treshold: number,
-	shiftPressed: boolean
+	treshold: number
 ): { position: Vector; alignment: Alignment } {
 	let position = { x, y }
 	let alignment: Alignment = 'NONE'
-	if (shiftPressed) {
-		return { position, alignment }
-	}
 	const centeredX = x > alignX - treshold && x < alignX + treshold
 	const centeredY = y > alignY - treshold && y < alignY + treshold
 	const both = centeredX && centeredY

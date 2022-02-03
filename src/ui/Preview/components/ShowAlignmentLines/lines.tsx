@@ -9,7 +9,7 @@ const ShowAlignmentLines = () => {
 		lightPosition,
 		lightAlignment,
 		positionPointerDown
-	} = useStore((state: any) => ({
+	} = useStore((state) => ({
 		previewBounds: state.previewBounds,
 		lightSize: state.light.size,
 		lightPosition: { x: state.light.x, y: state.light.y },

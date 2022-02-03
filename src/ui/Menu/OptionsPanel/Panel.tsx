@@ -53,7 +53,7 @@ const Panel = ({ bounds, anchor, open, onClose, children }: any) => {
 	useEffect(() => {
 		const padding = 8
 		animate.set({ x: 0, y: 0 - panelRect.height - padding })
-	}, [anchor, open])
+	}, [panelRect, anchor, open])
 
 	useEffect(() => {
 		if (!previewBounds.width || !previewBounds.height) return

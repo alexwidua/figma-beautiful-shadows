@@ -7,12 +7,17 @@ export interface PreviewBounds {
 	height: number
 }
 
+const DEBOUNCE_VALUE = 200
+
 const usePreviewBounds = (ref: any): PreviewBounds => {
 	const [previewBounds, setPreviewBounds] = useState<PreviewBounds>({
 		width: WINDOW_INITIAL_WIDTH,
 		height: WINDOW_INITIAL_HEIGHT
 	})
-	const debouncedValue = useDebounce<PreviewBounds>(previewBounds, 200)
+	const debouncedValue = useDebounce<PreviewBounds>(
+		previewBounds,
+		DEBOUNCE_VALUE
+	)
 
 	const getPreviewBounds = () => {
 		if (!ref.current) return

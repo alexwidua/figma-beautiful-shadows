@@ -47,7 +47,7 @@ const BrightnessSlider = ({ children }: { children: any }) => {
 	const slide: any = useDrag(
 		({ event, down: brightnessPointerDown, shiftKey, offset: [_, oy] }) => {
 			event.stopPropagation()
-			const value = shiftKey ? oy : stepped(oy, 2)
+			const value = shiftKey ? stepped(oy, 2) : oy
 			const normalized = Math.min(
 				normalize(value, brightnessDragMin, brightnessDragMax) +
 					LIGHT_MIN_BRIGHTNESS,

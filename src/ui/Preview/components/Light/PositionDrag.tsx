@@ -1,13 +1,16 @@
 import { h } from 'preact'
 import useStore from '../../../../store/useStore'
-import { useEffect } from 'preact/hooks'
+import { useRef, useEffect } from 'preact/hooks'
 import { useDrag } from '@use-gesture/react'
 import { useSpring, animated } from '@react-spring/web'
+import { stepped } from '../../../../utils/math'
+import { alignGridToCenter } from '../../../../utils/grid'
 import align from '../helpers/align'
 import {
 	WINDOW_INITIAL_WIDTH,
 	WINDOW_INITIAL_HEIGHT,
-	LIGHT_SNAP_TO_AXIS_TRESHOLD
+	LIGHT_SNAP_TO_AXIS_TRESHOLD,
+	GRID_SIZE
 } from '../../../../constants'
 
 // Types
@@ -35,6 +38,8 @@ const PositionDrag = ({ children, ...rest }: { children: any }) => {
 		setLight: state.setLight
 	}))
 
+	let prevRef = useRef(previewBounds)
+
 	/**
 	 * ✋ Handle drag gesture and translation
 	 * TODO: Initial position?
@@ -44,22 +49,39 @@ const PositionDrag = ({ children, ...rest }: { children: any }) => {
 		y: WINDOW_INITIAL_HEIGHT / 4 - size / 2
 	}))
 	const drag: any = useDrag(
-		({ down: positionPointerDown, shiftKey, offset: [ox, oy] }) => {
+		({
+			down: positionPointerDown,
+			shiftKey: shiftKeyDown,
+			offset: [ox, oy]
+		}) => {
 			const alignX = previewBounds.width / 2 - size / 2
 			const alignY = previewBounds.height / 2 - size / 2
-			const value = { x: ox, y: oy }
+			const snapToGrid = {
+				x:
+					stepped(ox, GRID_SIZE) -
+					GRID_SIZE +
+					alignGridToCenter(previewBounds.width, GRID_SIZE),
+				y:
+					stepped(oy, GRID_SIZE) -
+					GRID_SIZE +
+					alignGridToCenter(previewBounds.height, GRID_SIZE)
+			}
+			const value = shiftKeyDown ? snapToGrid : { x: ox, y: oy }
 			const { position, alignment } = align(
 				value.x,
 				value.y,
 				alignX,
 				alignY,
-				LIGHT_SNAP_TO_AXIS_TRESHOLD,
-				shiftKey
+				LIGHT_SNAP_TO_AXIS_TRESHOLD
 			)
-			const data: Partial<Light> = {
+			const data: Pick<
+				Light,
+				'x' | 'y' | 'alignment' | 'positionPointerDown' | 'shiftKeyDown'
+			> = {
 				...position,
 				alignment,
-				positionPointerDown
+				positionPointerDown,
+				shiftKeyDown
 			}
 			setLight(data)
 		},
@@ -85,19 +107,20 @@ const PositionDrag = ({ children, ...rest }: { children: any }) => {
 		})
 	}, [position])
 
-	// Keep light in bounds when window is resized
 	useEffect(() => {
-		const { width, height } = previewBounds
-		if (!width || !height) return
-		const OOBx = x.get() > width - size
-		const OOBy = y.get() > height - size
-		let position
-		const padding = 8
-		if (OOBx && OOBy)
-			position = { x: width - size - padding, y: height - size - padding }
-		else if (OOBx) position = { x: width - size - padding }
-		else if (OOBy) position = { y: height - size - padding }
-		if (position) setLight(position)
+		if (prevRef.current.width > 0 && prevRef.current.height > 0) {
+			const offsetX = previewBounds.width - prevRef.current.width
+			const offsetY = previewBounds.height - prevRef.current.height
+			const relativeToWindowX =
+				(x.get() + size / 2) / (prevRef.current.width / 2)
+			const relativeToWindowY =
+				(y.get() + size / 2) / (prevRef.current.height / 2)
+			const newX = x.get() + (offsetX / 2) * relativeToWindowX
+			const newY = y.get() + (offsetY / 2) * relativeToWindowY
+			const data: Pick<Light, 'x' | 'y'> = { x: newX, y: newY }
+			setLight(data)
+		}
+		prevRef.current = previewBounds
 	}, [previewBounds])
 
 	return (

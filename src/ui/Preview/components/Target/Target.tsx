@@ -32,15 +32,6 @@ const Target = ({ ...rest }) => {
 	)}
 	%`
 
-	// Assume that target is always centered
-	// TODO: Don't hardcode position? Idk yet
-	const x = previewBounds.width / 2
-	const y = previewBounds.height / 2
-	useEffect(() => {
-		const data: Partial<Target> = { x, y }
-		setTarget(data)
-	}, [x, y])
-
 	return (
 		<Fragment>
 			<Badge
