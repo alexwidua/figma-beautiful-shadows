@@ -1,5 +1,4 @@
 import { h, Fragment } from 'preact'
-import { useEffect } from 'preact/hooks'
 import useElevationSlider from './useElevationSlider'
 import useSelectionStyle from './useSelectionStyle'
 import useShadowStyle from './useShadowStyle'
@@ -7,7 +6,6 @@ import useStore from '../../../../store/useStore'
 import { animated, to } from '@react-spring/web'
 import Badge from '../Badge/badge'
 import styles from './target.css'
-import { TARGET_MIN_ELEVATION } from '../../../../constants'
 
 // Types
 import { Target } from '../../../../store/createTarget'
@@ -27,9 +25,7 @@ const Target = ({ ...rest }) => {
 	const [scale, slide] = useElevationSlider()
 	const selectionStyle = useSelectionStyle()
 	const shadowStyle = useShadowStyle()
-	const label = `Elevation ${Math.round(
-		(elevation - TARGET_MIN_ELEVATION) * 100
-	)}
+	const label = `Elevation ${Math.round(elevation * 100)}
 	%`
 
 	return (

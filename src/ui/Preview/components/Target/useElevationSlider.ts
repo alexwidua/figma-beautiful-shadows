@@ -1,13 +1,10 @@
 import { useEffect } from 'preact/hooks'
+import useStore from '../../../../store/useStore'
 import { useDrag } from '@use-gesture/react'
 import { useSpring } from '@react-spring/web'
-import useStore from '../../../../store/useStore'
 import { stepped, normalize, denormalize } from '../../../../utils/math'
 import { Target } from '../../../../store/createTarget'
-import {
-	TARGET_INITIAL_ELEVATION,
-	TARGET_MIN_ELEVATION
-} from '../../../../constants'
+import { TARGET_MIN_ELEVATION } from '../../../../constants'
 
 // Constants
 const DRAG_RANGE = 50
@@ -34,13 +31,25 @@ const useElevationSlider = () => {
 			const normalized = normalize(value, DRAG_RANGE, -DRAG_RANGE)
 
 			const data: Pick<Target, 'elevation' & 'elevationPointerDown'> = {
-				elevation: normalized + TARGET_MIN_ELEVATION,
+				elevation: normalized,
 				elevationPointerDown
 			}
 			setTarget(data)
+
+			if (!elevationPointerDown && oy === DRAG_RANGE) {
+				setTarget({ elevation: TARGET_MIN_ELEVATION })
+			}
 		},
 		{
-			bounds: { top: -DRAG_RANGE, bottom: DRAG_RANGE }
+			bounds: { top: -DRAG_RANGE, bottom: DRAG_RANGE },
+			from: () => [
+				0,
+				denormalize(
+					normalize(scale.get(), 1.125, 1.375),
+					DRAG_RANGE,
+					-DRAG_RANGE
+				)
+			]
 		}
 	)
 
@@ -52,7 +61,7 @@ const useElevationSlider = () => {
 		const damp = 4
 		const dampedDenormalized =
 			normalize(denormalized, DRAG_RANGE * damp, -DRAG_RANGE * damp) +
-			TARGET_INITIAL_ELEVATION
+			0.75
 		animate.start({
 			scale: dampedDenormalized,
 			immediate: elevationPointerDown
