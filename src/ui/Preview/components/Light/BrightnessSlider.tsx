@@ -25,7 +25,13 @@ const sunRayRadius = 24
 const opacity_min = 0.4
 const opacity_max = 1
 
-const BrightnessSlider = ({ children }: { children: any }) => {
+const BrightnessSlider = ({
+	isHuggingTop,
+	children
+}: {
+	isHuggingTop: boolean
+	children: any
+}) => {
 	/**
 	 * 💾 Store
 	 */
@@ -47,7 +53,11 @@ const BrightnessSlider = ({ children }: { children: any }) => {
 	const slide: any = useDrag(
 		({ event, down: brightnessPointerDown, shiftKey, offset: [_, oy] }) => {
 			event.stopPropagation()
-			const value = shiftKey ? stepped(oy, 2) : oy
+			const value = shiftKey
+				? stepped(oy, 2)
+				: isHuggingTop
+				? Math.abs(oy) - Math.abs(brightnessDragMax)
+				: oy
 			const normalized = Math.min(
 				normalize(value, brightnessDragMin, brightnessDragMax) +
 					LIGHT_MIN_BRIGHTNESS,
@@ -61,7 +71,10 @@ const BrightnessSlider = ({ children }: { children: any }) => {
 		},
 		{
 			bounds: { bottom: brightnessDragMin, top: brightnessDragMax },
-			from: () => [y.get(), y.get()]
+			from: () =>
+				!isHuggingTop
+					? [0, y.get()]
+					: [0, -y.get() - Math.abs(brightnessDragMax)]
 		}
 	)
 

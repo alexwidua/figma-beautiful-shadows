@@ -16,7 +16,14 @@ import {
 // Types
 import { Light } from '../../../../store/createLight'
 
-const PositionDrag = ({ children, ...rest }: { children: any }) => {
+const PositionDrag = ({
+	children,
+	style,
+	...rest
+}: {
+	style?: any
+	children: any
+}) => {
 	/**
 	 * 💾 Store
 	 */
@@ -126,6 +133,7 @@ const PositionDrag = ({ children, ...rest }: { children: any }) => {
 	return (
 		<animated.div
 			style={{
+				...style,
 				x,
 				y,
 				width: size,
