@@ -3,7 +3,6 @@ import useStore from '../../../../store/useStore'
 import { useState, useEffect } from 'preact/hooks'
 import { percent, clamp, deriveXYFromAngle } from '../../../../utils/math'
 import { TextboxNumeric } from '@create-figma-plugin/ui'
-import { TARGET_MIN_ELEVATION } from '../../../../constants'
 import styles from './parameters.css'
 
 // Types
@@ -101,7 +100,7 @@ const Parameters = () => {
 	const [tempElevation, setTempElevation] = useState<string>('0')
 	const validateElevation = (value: null | number) => {
 		if (value === null) return null
-		const valid = value >= TARGET_MIN_ELEVATION && value <= 100
+		const valid = value >= 0 && value <= 100
 		if (valid) {
 			const data: Pick<Target, 'elevation'> = { elevation: value / 100 } // normalize value back to 0..1
 			setTarget(data)

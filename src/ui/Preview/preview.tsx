@@ -82,6 +82,9 @@ const Preview = forwardRef<any>(({ children }: any, ref) => {
 		setPreview(update)
 	}, [light, target, background])
 
+	/**
+	 * Show grid
+	 */
 	const grid = {
 		backgroundImage: `radial-gradient(rgba(0,0,0,${
 			shiftKeyDown ? (positionPointerDown ? GRID_OPACITY : 0) : 0

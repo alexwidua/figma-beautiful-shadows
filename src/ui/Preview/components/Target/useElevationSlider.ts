@@ -4,7 +4,6 @@ import { useDrag } from '@use-gesture/react'
 import { useSpring } from '@react-spring/web'
 import { stepped, normalize, denormalize } from '../../../../utils/math'
 import { Target } from '../../../../store/createTarget'
-import { TARGET_MIN_ELEVATION } from '../../../../constants'
 
 // Constants
 const DRAG_RANGE = 50
@@ -37,7 +36,7 @@ const useElevationSlider = () => {
 			setTarget(data)
 
 			if (!elevationPointerDown && oy === DRAG_RANGE) {
-				setTarget({ elevation: TARGET_MIN_ELEVATION })
+				setTarget({ elevation: 0 })
 			}
 		},
 		{

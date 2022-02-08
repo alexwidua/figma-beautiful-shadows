@@ -5,10 +5,7 @@ import { useDrag } from '@use-gesture/react'
 import { useSpring, animated } from '@react-spring/web'
 import { stepped, normalize, denormalize, clamp } from '../../../../utils/math'
 import styles from './brightness-slider.css'
-import {
-	LIGHT_INITIAL_BRIGHTNESS,
-	LIGHT_MIN_BRIGHTNESS
-} from '../../../../constants'
+import { LIGHT_INITIAL_BRIGHTNESS } from '../../../../constants'
 
 // Types
 import { Light } from '../../../../store/createLight'
@@ -59,11 +56,10 @@ const BrightnessSlider = ({
 				? Math.abs(oy) - Math.abs(brightnessDragMax)
 				: oy
 			const normalized = Math.min(
-				normalize(value, brightnessDragMin, brightnessDragMax) +
-					LIGHT_MIN_BRIGHTNESS,
+				normalize(value, brightnessDragMin, brightnessDragMax),
 				1
 			)
-			const data: Partial<Light> = {
+			const data: Pick<Light, 'brightness' | 'brightnessPointerDown'> = {
 				brightness: normalized,
 				brightnessPointerDown
 			}
