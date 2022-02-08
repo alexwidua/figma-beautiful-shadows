@@ -42,11 +42,13 @@ const Menu = ({ bounds }: any) => {
 					<IconAdjust32 />
 				</IconButton>
 				<Button
-					style={{ minWidth: 96 }}
 					disabled={selection.valid !== 'VALID'}
 					onClick={applyShadowsToSelectedCanvasElement}
 					//@ts-ignore next-line
-					style={{ opacity: selection.valid !== 'VALID' ? 0.5 : 1 }}>
+					style={{
+						minWidth: 96,
+						opacity: selection.valid !== 'VALID' ? 0.5 : 1
+					}}>
 					Apply
 				</Button>
 			</Columns>
