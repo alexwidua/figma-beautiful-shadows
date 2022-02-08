@@ -24,12 +24,14 @@ const useShadow = () => {
 		(shadow) =>
 			`${shadow.offset.x}px ${shadow.offset.y}px ${
 				shadow.radius
-			}px ${chroma.gl(
-				shadow.color.r,
-				shadow.color.g,
-				shadow.color.b,
-				shadow.color.a
-			)}`
+			}px rgba(${chroma
+				.gl(
+					shadow.color.r,
+					shadow.color.g,
+					shadow.color.b,
+					shadow.color.a
+				)
+				.rgba()}) `
 	)
 
 	return { boxShadow: shadow }

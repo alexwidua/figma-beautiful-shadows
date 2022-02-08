@@ -1,4 +1,4 @@
-import { clamp, normalize, degreeToRadian } from './math'
+import { clamp, normalize, round, degreeToRadian } from './math'
 import { easeQuadOut } from 'd3-ease'
 import chroma from 'chroma-js'
 import { SHADOW_BASE_BLUR } from '../constants'
@@ -57,21 +57,24 @@ export function getCastedShadows({
 					r: color[0],
 					g: color[1],
 					b: color[2],
-					a: brightness - brightness * step
+					a: round(brightness - brightness * step, 2)
 				},
 				offset: {
-					x:
+					x: round(
 						Math.cos(azimuthRad) *
-						(relativeDistance * elevation * step),
-					y:
+							(relativeDistance * elevation * step)
+					),
+					y: round(
 						Math.sin(azimuthRad) *
-						(relativeDistance * elevation * step)
+							(relativeDistance * elevation * step)
+					)
 				},
-				radius:
+				radius: round(
 					SHADOW_BASE_BLUR *
-					blurShadowWithDistance *
-					step *
-					(elevation * 2),
+						blurShadowWithDistance *
+						step *
+						(elevation * 2)
+				),
 				spread: 0
 			}
 		}

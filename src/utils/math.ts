@@ -18,6 +18,10 @@ export function percent(value: number, roundValue: boolean = true) {
 	return roundValue ? Math.round(value * 100) : value * 100
 }
 
+export function round(value: number, decimals: number = 0) {
+	return Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals)
+}
+
 export function angleFromLightToTarget(vec1: Vector, vec2: Vector): number {
 	const deg = Math.atan2(vec1.y - vec2.y, vec1.x - vec2.x) * (180 / Math.PI)
 	return deg < 0 ? 360 + deg : deg
