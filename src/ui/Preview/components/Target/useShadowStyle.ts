@@ -31,10 +31,10 @@ const useShadow = () => {
 					shadow.color.b,
 					shadow.color.a
 				)
-				.rgba()}) `
+				.rgba()})`
 	)
 
-	return { boxShadow: shadow }
+	return { boxShadow: shadow.toString() }
 }
 
 export default useShadow

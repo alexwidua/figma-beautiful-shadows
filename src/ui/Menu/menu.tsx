@@ -6,7 +6,8 @@ import {
 	Button,
 	Columns,
 	IconButton,
-	IconAdjust32
+	IconEllipsis32,
+	IconCode32
 } from '@create-figma-plugin/ui'
 import OptionsPanel from './OptionsPanel'
 import styles from './menu.css'
@@ -14,8 +15,8 @@ import styles from './menu.css'
 const Menu = ({ bounds }: any) => {
 	const selection = useStore((state) => state.selection)
 
-	const menuRef = useRef<any>()
 	const [optionsPanelOpen, setOptionsPanelOpen] = useState<boolean>(false)
+	const menuRef = useRef<any>()
 	const [menuRect, setMenuRect] = useState<Partial<DOMRect>>({
 		x: 0,
 		y: 0,
@@ -35,11 +36,11 @@ const Menu = ({ bounds }: any) => {
 
 	return (
 		<div className={styles.menu} ref={menuRef}>
-			<Columns space="extraSmall">
+			<Columns space={'extraSmall'}>
 				<IconButton
 					onChange={() => setOptionsPanelOpen((prev) => !prev)}
 					value={optionsPanelOpen}>
-					<IconAdjust32 />
+					<IconEllipsis32 />
 				</IconButton>
 				<Button
 					disabled={selection.valid !== 'VALID'}
