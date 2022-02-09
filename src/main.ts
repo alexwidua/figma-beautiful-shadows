@@ -132,7 +132,7 @@ export default function () {
 		const { azimuth, distance, elevation, brightness, backgroundColor } =
 			preview
 		const shadows = getCastedShadows({
-			smoothness: 6,
+			numShadows: 6,
 			azimuth,
 			distance,
 			elevation,

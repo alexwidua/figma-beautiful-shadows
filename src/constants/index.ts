@@ -20,15 +20,15 @@ export const DEBOUNCE_CANVAS_UPDATES = 10 // ms
 export const LIGHT_SIZE = 32
 export const LIGHT_INITIAL_POSITION = {
 	x: WINDOW_INITIAL_WIDTH / 2 - LIGHT_SIZE / 2,
-	y: WINDOW_INITIAL_WIDTH / 2 - 64
+	y: WINDOW_INITIAL_WIDTH / 2 - 148
 }
-export const LIGHT_INITIAL_BRIGHTNESS = 0.2 // value between 0-1
+export const LIGHT_INITIAL_BRIGHTNESS = 0.1 // value between 0-1
 export const LIGHT_MIN_BRIGHTNESS = 0.01 // value between 0-1
 
 /**
  * Target element which casts the shadow
  */
-export const TARGET_INITIAL_ELEVATION = 0.2
+export const TARGET_INITIAL_ELEVATION = 0.15
 
 /**
  * Background

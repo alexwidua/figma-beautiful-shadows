@@ -12,7 +12,7 @@ const useShadow = () => {
 			backgroundColor: state.preview.backgroundColor
 		}))
 	const shadows = getCastedShadows({
-		smoothness: 6,
+		numShadows: 6,
 		azimuth,
 		distance,
 		elevation,

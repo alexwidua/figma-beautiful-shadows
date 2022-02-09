@@ -3,8 +3,8 @@ import { resizeAndRetainAspectRatio } from '../../../../utils/math'
 import { SelectionValidity } from '../../../../utils/selection'
 
 // Constants
-const ELEMENT_BASE_WIDTH = 100
-const ELEMENT_BASE_HEIGHT = 100
+export const TARGET_WIDTH = 100
+export const TARGET_HEIGHT = 100
 
 const useSelectionStyle = () => {
 	const {
@@ -28,18 +28,13 @@ const useSelectionStyle = () => {
 		width: elementWidth,
 		height: elementHeight,
 		ratio
-	} = resizeAndRetainAspectRatio(
-		width,
-		height,
-		ELEMENT_BASE_WIDTH,
-		ELEMENT_BASE_HEIGHT
-	)
+	} = resizeAndRetainAspectRatio(width, height, TARGET_WIDTH, TARGET_HEIGHT)
 	const selectionStyles = {
 		border: isSelected
 			? '1px solid var(--color-blue)'
 			: '1px solid rgba(0,0,0,0.2)',
-		width: elementWidth || ELEMENT_BASE_WIDTH,
-		height: elementHeight || ELEMENT_BASE_HEIGHT,
+		width: elementWidth || TARGET_WIDTH,
+		height: elementHeight || TARGET_HEIGHT,
 		borderRadius: cornerRadius * ratio || 4
 	}
 	return selectionStyles

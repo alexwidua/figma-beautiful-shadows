@@ -14,14 +14,11 @@ const Target = ({ ...rest }) => {
 	/**
 	 * 💾 Store
 	 */
-	const { previewBounds, elevation, elevationPointerDown, setTarget } =
-		useStore((state) => ({
-			previewBounds: state.previewBounds,
-			elevation: state.target.elevation,
-			elevationPointerDown: state.target.elevationPointerDown,
-			preview: state.preview,
-			setTarget: state.setTarget
-		}))
+	const { elevation, elevationPointerDown } = useStore((state) => ({
+		elevation: state.target.elevation,
+		elevationPointerDown: state.target.elevationPointerDown,
+		preview: state.preview
+	}))
 	const [scale, slide] = useElevationSlider()
 	const selectionStyle = useSelectionStyle()
 	const shadowStyle = useShadowStyle()
