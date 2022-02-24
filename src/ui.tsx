@@ -16,7 +16,9 @@ import {
 	WINDOW_MAX_WIDTH,
 	WINDOW_MIN_HEIGHT,
 	WINDOW_MAX_HEIGHT,
-	LIGHT_INITIAL_POSITION
+	LIGHT_INITIAL_POSITION,
+	SHADOW_DEFAULT_COLOR,
+	BACKGROUND_DEFAULT_COLOR
 } from './constants'
 
 // Types
@@ -110,8 +112,8 @@ const Plugin = () => {
 
 	const setShadowColorAndBackground = useCallback(
 		(derivedBackgroundColor: RGBA | undefined) => {
-			let shadowColor = 'ffffff'
-			let backgroundColor = '#eee'
+			let shadowColor = SHADOW_DEFAULT_COLOR
+			let backgroundColor = BACKGROUND_DEFAULT_COLOR
 			if (derivedBackgroundColor) {
 				const { r, g, b, a } = derivedBackgroundColor
 				const toHex = chroma.gl(r, g, b, a).hex()
@@ -126,8 +128,6 @@ const Plugin = () => {
 				const color = chroma.hsl(hsl[0], hsl[1], hsl[2]).hex()
 				shadowColor = color.replace('#', '')
 				backgroundColor = toHex
-			} else {
-				shadowColor = '000000'
 			}
 			setColor(shadowColor)
 			setPreview({
