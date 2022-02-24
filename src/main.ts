@@ -92,10 +92,9 @@ export default function () {
 		} else if (state === 'MULTIPLE' || state === 'INVALID') {
 			cleanUpAndRestorePrevEffects()
 			figma.notify(ERROR_MSG[state])
-		} else if (state === 'VALID') {
+		} else if (state === 'VALID' || state === 'IS_WITHIN_COMPONENT') {
 			if (nodeRef) cleanUpAndRestorePrevEffects()
 			nodeRef = selection[0]
-			// checkIfExistingShadowData()
 			existingNodeEffects = nodeRef.effects
 		}
 		if (nodeRef?.removed) return
