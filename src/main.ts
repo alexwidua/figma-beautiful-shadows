@@ -2,7 +2,7 @@ import { on, once, emit, showUI } from '@create-figma-plugin/utilities'
 import { validateSelection, SelectionState } from './utils/selection'
 import { getCastedShadows } from './utils/shadow'
 import { hexToGL } from './utils/color'
-import { searchForEnclosingNode } from './utils/node'
+import { searchForEnclosingNode, isSymbol } from './utils/node'
 import { WINDOW_INITIAL_WIDTH, WINDOW_INITIAL_HEIGHT } from './constants'
 
 // Types
@@ -105,12 +105,15 @@ export default function () {
 			type: nodeRef?.type || undefined,
 			width: nodeRef?.width || 0,
 			height: nodeRef?.height || 0,
-			cornerRadius: nodeRef?.cornerRadius || 0,
+			cornerRadius: !isSymbol(nodeRef?.cornerRadius)
+				? nodeRef?.cornerRadius
+				: 0,
 			derivedBackgroundColor: tryToDeriveBGColorFromCanvas(
 				state !== 'VALID'
 			),
 			prevShadowEffects: checkIfExistingShadowData()
 		}
+
 		emit('SELECTION_CHANGE', data)
 	}
 
