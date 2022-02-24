@@ -1,6 +1,6 @@
 import useStore from '../../../../store/useStore'
 import { resizeAndRetainAspectRatio } from '../../../../utils/math'
-import { SelectionValidity } from '../../../../utils/selection'
+import { SelectionState } from '../../../../utils/selection'
 
 // Constants
 export const TARGET_WIDTH = 100
@@ -8,22 +8,22 @@ export const TARGET_HEIGHT = 100
 
 const useSelectionStyle = () => {
 	const {
-		valid,
+		state,
 		width,
 		height,
 		cornerRadius
 	}: {
-		valid: SelectionValidity
+		state: SelectionState
 		width: number
 		height: number
 		cornerRadius: number
 	} = useStore((state) => ({
-		valid: state.selection.valid,
+		state: state.selection.state,
 		width: state.selection.width,
 		height: state.selection.height,
 		cornerRadius: state.selection.cornerRadius
 	}))
-	const isSelected = valid === 'VALID'
+	const isSelected = state === 'VALID'
 	const {
 		width: elementWidth,
 		height: elementHeight,

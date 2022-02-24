@@ -1,5 +1,6 @@
 {
 	"dependencies": {
+		"@alexwidua/create-figma-plugin-components": "^0.1.10",
 		"@create-figma-plugin/ui": "^1.8.2",
 		"@create-figma-plugin/utilities": "^1.8.2",
 		"@react-spring/web": "^9.4.2",

@@ -11,6 +11,7 @@ export type Preview = {
 	distance: number
 	elevation: number
 	brightness: number
+	shadowColor: string
 	backgroundColor: string
 }
 export interface PreviewState {
@@ -24,6 +25,7 @@ const createPreview = (set: SetState<Store>) => ({
 		distance: 0,
 		elevation: TARGET_INITIAL_ELEVATION,
 		brightness: LIGHT_INITIAL_BRIGHTNESS,
+		shadowColor: '#eee',
 		backgroundColor: BACKGROUND_DEFAULT_COLOR
 	},
 	setPreview: (preview: Preview | Partial<Preview>) =>

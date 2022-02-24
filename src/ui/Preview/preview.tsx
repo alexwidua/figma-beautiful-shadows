@@ -1,8 +1,10 @@
 import { h } from 'preact'
+import { useEffect, useCallback } from 'preact/hooks'
+import usePreviewBounds, { PreviewBounds } from '../../hooks/usePreviewBounds'
 import { forwardRef } from 'preact/compat'
 import useStore from '../../store/useStore'
-import { useEffect, useLayoutEffect } from 'preact/hooks'
-import usePreviewBounds, { PreviewBounds } from '../../hooks/usePreviewBounds'
+import { emit } from '@create-figma-plugin/utilities'
+import { debounce } from '../../utils/debounce'
 import {
 	angleFromLightToTarget,
 	distanceFromLightToTarget
@@ -11,15 +13,18 @@ import { alignGridToCenter } from '../../utils/grid'
 import Target from './components/Target/target'
 import Light from './components/Light'
 import ShowAlignmentLines from './components/ShowAlignmentLines/lines'
+import styles from './preview.css'
+
+// Constants
 import {
-	BACKGROUND_DEFAULT_COLOR,
+	DEBOUNCE_CANVAS_UPDATES,
 	GRID_SIZE,
 	GRID_OPACITY
 } from '../../constants'
-import styles from './preview.css'
 
 // Types
 import { Preview } from '../../store/createPreview'
+import { PluginData } from '../../main'
 
 const Preview = forwardRef<any>(({ children }: any, ref) => {
 	const { width, height }: PreviewBounds = usePreviewBounds(ref)
@@ -31,28 +36,28 @@ const Preview = forwardRef<any>(({ children }: any, ref) => {
 	 * 💾 Store
 	 */
 	const {
+		color,
+		backgroundColor,
 		light,
 		target,
-		background,
+		selection,
+		previewBounds,
 		positionPointerDown,
 		shiftKeyDown,
 		setPreview,
 		setPreviewBounds
 	} = useStore((state) => ({
+		color: state.color,
+		backgroundColor: state.preview.backgroundColor,
 		light: state.light,
 		target: state.target,
-		background: state.background,
+		selection: state.selection,
+		previewBounds: state.previewBounds,
 		positionPointerDown: state.light.positionPointerDown,
 		shiftKeyDown: state.light.shiftKeyDown,
 		setPreview: state.setPreview,
 		setPreviewBounds: state.setPreviewBounds
 	}))
-	const backgroundColor =
-		background.preference === 'NONE'
-			? BACKGROUND_DEFAULT_COLOR
-			: background.preference === 'AUTO'
-			? background.auto
-			: background.custom
 
 	/**
 	 * 👂 Listen for changes from the Light or Target component and update the preview
@@ -71,16 +76,33 @@ const Preview = forwardRef<any>(({ children }: any, ref) => {
 		)
 		const elevation = target.elevation
 		const brightness = light.brightness
+		const shadowColor = color
 
 		const update: Preview = {
 			azimuth,
 			distance,
 			elevation,
 			brightness,
+			shadowColor,
 			backgroundColor
 		}
 		setPreview(update)
-	}, [light, target, background])
+
+		const pluginData: PluginData = {
+			...update,
+			lightPosition,
+			previewBounds
+		}
+		debounceCanvasUpdate(pluginData)
+	}, [light, target, color, selection, previewBounds])
+
+	const debounceCanvasUpdate = useCallback(
+		debounce(
+			(data) => emit('UPDATE_SHADOWS', data),
+			DEBOUNCE_CANVAS_UPDATES
+		),
+		[]
+	)
 
 	/**
 	 * Show grid

@@ -9,6 +9,7 @@ import align from '../helpers/align'
 import {
 	WINDOW_INITIAL_WIDTH,
 	WINDOW_INITIAL_HEIGHT,
+	LIGHT_SIZE,
 	LIGHT_SNAP_TO_AXIS_TRESHOLD,
 	GRID_SIZE
 } from '../../../../constants'
@@ -27,23 +28,14 @@ const PositionDrag = ({
 	/**
 	 * 💾 Store
 	 */
-	const {
-		previewBounds,
-		azimuth,
-		position,
-		distance,
-		size,
-		positionPointerDown,
-		setLight
-	} = useStore((state) => ({
-		previewBounds: state.previewBounds,
-		azimuth: state.preview.azimuth,
-		position: { x: state.light.x, y: state.light.y },
-		distance: state.preview.distance,
-		size: state.light.size,
-		positionPointerDown: state.light.positionPointerDown,
-		setLight: state.setLight
-	}))
+	const { previewBounds, position, size, positionPointerDown, setLight } =
+		useStore((state) => ({
+			previewBounds: state.previewBounds,
+			position: { x: state.light.x, y: state.light.y },
+			size: state.light.size,
+			positionPointerDown: state.light.positionPointerDown,
+			setLight: state.setLight
+		}))
 
 	let prevRef = useRef(previewBounds)
 
@@ -114,20 +106,21 @@ const PositionDrag = ({
 		})
 	}, [position])
 
+	// Keep light in bounds when resizing window
 	useEffect(() => {
-		if (prevRef.current.width > 0 && prevRef.current.height > 0) {
-			const offsetX = previewBounds.width - prevRef.current.width
-			const offsetY = previewBounds.height - prevRef.current.height
-			const relativeToWindowX =
-				(x.get() + size / 2) / (prevRef.current.width / 2)
-			const relativeToWindowY =
-				(y.get() + size / 2) / (prevRef.current.height / 2)
-			const newX = x.get() + (offsetX / 2) * relativeToWindowX
-			const newY = y.get() + (offsetY / 2) * relativeToWindowY
-			const data: Pick<Light, 'x' | 'y'> = { x: newX, y: newY }
+		if (previewBounds.width === 0 || previewBounds.height === 0) return
+		const outOfBoundsX = position.x + LIGHT_SIZE > previewBounds.width
+		const outOfBoundsY = position.y + LIGHT_SIZE > previewBounds.height
+		if (outOfBoundsX || outOfBoundsY) {
+			const x = outOfBoundsX
+				? previewBounds.width - LIGHT_SIZE
+				: position.x
+			const y = outOfBoundsY
+				? previewBounds.height - LIGHT_SIZE
+				: position.y
+			const data: Pick<Light, 'x' | 'y'> = { x, y }
 			setLight(data)
 		}
-		prevRef.current = previewBounds
 	}, [previewBounds])
 
 	return (

@@ -1,13 +1,15 @@
 import { SetState } from 'zustand'
 import { Store } from './useStore'
-import { SelectionValidity } from '../utils/selection'
+import { SelectionState as _SelectionState } from '../utils/selection'
 
 export type Selection = {
-	valid: SelectionValidity
+	state: _SelectionState
 	width: number
 	height: number
 	cornerRadius: number
 	type: NodeType
+	derivedBackgroundColor: RGBA | undefined
+	prevShadowEffects: any
 }
 export interface SelectionState {
 	selection: Selection
@@ -16,11 +18,13 @@ export interface SelectionState {
 
 const createSelection = (set: SetState<Store>) => ({
 	selection: {
-		valid: 'EMPTY' as SelectionValidity,
+		state: 'EMPTY' as _SelectionState,
 		width: 0,
 		height: 0,
 		cornerRadius: 0,
-		type: 'RECTANGLE' as NodeType
+		type: 'RECTANGLE' as NodeType,
+		derivedBackgroundColor: undefined,
+		prevShadowEffects: undefined
 	},
 	setSelection: (selection: Selection) =>
 		set(() => ({

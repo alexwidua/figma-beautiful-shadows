@@ -5,15 +5,23 @@ import {
 	Divider,
 	VerticalSpace
 } from '@create-figma-plugin/ui'
-import Panel from './Panel'
+// import Panel from './Panel'
 import Parameters from './options/Parameters'
-import BackgroundPreference from './options/BackgroundPreference'
+import ShadowColor from './options/ShadowColor'
+import { Panel } from '@alexwidua/create-figma-plugin-components'
 import styles from './index.css'
 
 const Options = ({ bounds, anchor, open, onClose }: any) => {
 	return (
-		<Panel bounds={bounds} anchor={anchor} open={open} onClose={onClose}>
-			<Container space={'small'}>
+		<Panel
+			boundsRef={bounds}
+			anchorRef={anchor}
+			open={open}
+			onClose={onClose}
+			anchorAlign="RIGHT"
+			anchorMargin={0}>
+			<Container space={'small'} style={{ width: 196 }}>
+				<VerticalSpace space={'small'} />
 				<div className={styles.row}>
 					<Parameters />
 				</div>
@@ -26,16 +34,13 @@ const Options = ({ bounds, anchor, open, onClose }: any) => {
 						width: 'calc(100% + (var(--space-small)*2))'
 					}}
 				/>
-				<VerticalSpace space={'small'} />
+				<VerticalSpace space={'medium'} />
+				<Text bold>Shadow Color</Text>
+				<VerticalSpace space={'medium'} />
 				<div className={styles.row}>
-					<BackgroundPreference />
+					<ShadowColor />
 				</div>
-				<VerticalSpace space={'small'} />
-				<Text muted>
-					The background color is used to tint the shadow for a more
-					realistic result.
-				</Text>
-				<VerticalSpace space={'small'} />
+				<VerticalSpace space={'medium'} />
 			</Container>
 		</Panel>
 	)

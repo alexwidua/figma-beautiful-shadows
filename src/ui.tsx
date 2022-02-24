@@ -3,111 +3,138 @@ import useStore from './store/useStore'
 import { useRef, useEffect, useCallback } from 'preact/hooks'
 import { emit, on } from '@create-figma-plugin/utilities'
 import { useWindowResize, render } from '@create-figma-plugin/ui'
-import { debounce } from './utils/debounce'
-import { deriveXYFromAngle } from './utils/math'
+import { clamp } from './utils/math'
 import chroma from 'chroma-js'
 import PreviewEditor from './ui/Preview/preview'
 import Menu from './ui/Menu/menu'
+
+// Constants
 import {
-	DEBOUNCE_CANVAS_UPDATES,
 	WINDOW_INITIAL_WIDTH,
 	WINDOW_INITIAL_HEIGHT,
 	WINDOW_MIN_WIDTH,
 	WINDOW_MAX_WIDTH,
 	WINDOW_MIN_HEIGHT,
 	WINDOW_MAX_HEIGHT,
-	BACKGROUND_DEFAULT_COLOR
+	LIGHT_INITIAL_POSITION
 } from './constants'
 
 // Types
 import { Light } from './store/createLight'
 import { Target } from './store/createTarget'
-import { Background } from './store/createBackground'
 import { Selection } from './store/createSelection'
-import { Preview } from './store/createPreview'
+import { PluginData } from './main'
 
 const Plugin = () => {
 	const bounds = useRef<any>()
 	makePluginResizeable()
 	const {
-		preview,
-		previewBounds,
 		light,
-		setLight,
-		setTarget,
-		setBackground,
-		setSelection
+		target,
+		setColor,
+		setPreview,
+		setSelection,
+		setEntireStore
 	} = useStore((state) => ({
-		preview: state.preview,
-		previewBounds: state.previewBounds,
 		light: state.light,
-		setLight: state.setLight,
-		setTarget: state.setTarget,
-		setBackground: state.setBackground,
-		setSelection: state.setSelection
+		target: state.target,
+		setColor: state.setColor,
+		setPreview: state.setPreview,
+		setSelection: state.setSelection,
+		setEntireStore: state.setEntireStore
 	}))
-
-	/**
-	 * ✉️ Emit preview update TO plugin (main.ts)
-	 */
-	useEffect(() => {
-		debounceCanvasUpdate(preview)
-	}, [preview])
-	const debounceCanvasUpdate = useCallback(
-		debounce(
-			(data) => emit('UPDATE_SHADOWS', data),
-			DEBOUNCE_CANVAS_UPDATES
-		),
-		[]
-	)
 
 	/**
 	 * 👂 Listen for changes FROM plugin (main.ts)
 	 *
 	 * · See if the selected element has shadows from an earlier sessions and if yes, update the preview with said values
 	 * · Listen for selection updates and style the target element respectively
-	 * · See if a background color can be derived from the canvas (by checking nodes that intersect with selection)
 	 */
 	useEffect(() => {
-		on('DERIVED_BACKGROUND_COLOR_FROM_CANVAS', updateDerivedBackgroundColor)
-		on('SELECTION_CHANGE', updateSelection)
-		on('LOAD_EXISTING_SHADOW_DATA', restorePreviousShadow)
+		on('SELECTION_CHANGE', handleSelectionChange)
+		on('LOAD_EXISTING_SHADOW_DATA', restorePrevEffectsAndSettings)
 	}, [])
 
-	const restorePreviousShadow = useCallback((preview: Preview) => {
-		const { azimuth, distance, brightness, elevation } = preview
-		const { dx, dy } = deriveXYFromAngle(azimuth, distance)
-		// at this point, previewBounds hasnt been updated so we use the initial window values because we can safely assume that the window hasn't been resized
-		const adjustedX = WINDOW_INITIAL_WIDTH / 2 - light.size / 2 - dx
-		const adjustedY = WINDOW_INITIAL_HEIGHT / 2 - light.size / 2 - dy
-		const lightData: Pick<Light, 'x' | 'y' | 'brightness'> = {
-			x: adjustedX,
-			y: adjustedY,
-			brightness
-		}
-		setLight(lightData)
-		const targetData: Pick<Target, 'elevation'> = { elevation }
-		setTarget(targetData)
-	}, [])
-
-	const updateSelection = useCallback((selection: Selection) => {
-		setSelection(selection)
-	}, [])
-
-	const updateDerivedBackgroundColor = useCallback(
-		(backgroundColor: SolidPaint | undefined) => {
-			let color
-			if (backgroundColor) {
-				const { opacity } = backgroundColor
-				const { r, g, b } = backgroundColor.color
-				color = chroma.gl(r, g, b, opacity).hex()
-			} else {
-				color = BACKGROUND_DEFAULT_COLOR
+	const restorePrevEffectsAndSettings = useCallback(
+		(pluginData: PluginData) => {
+			const {
+				lightPosition,
+				shadowColor,
+				brightness,
+				elevation,
+				previewBounds
+			} = pluginData
+			const x = lightPosition?.x || LIGHT_INITIAL_POSITION.x
+			const y = lightPosition?.y || LIGHT_INITIAL_POSITION.y
+			const lightData: Pick<Light, 'x' | 'y' | 'brightness'> = {
+				x,
+				y,
+				brightness
 			}
-			const data: Partial<Background> = { auto: color }
-			setBackground(data)
+			const targetData: Pick<Target, 'elevation'> = { elevation }
+			setEntireStore({
+				color: shadowColor || '#000',
+				light: { ...light, ...lightData },
+				target: { ...target, ...targetData }
+			})
+			const restoreWindowSize = previewBounds || {
+				width: WINDOW_INITIAL_WIDTH,
+				height: WINDOW_INITIAL_HEIGHT
+			}
+			emit('RESIZE_WINDOW', restoreWindowSize)
+
+			// Shadows created in version =<9 don't have the lightPosition property
+			if (lightPosition !== undefined) {
+				emit('SHOW_MESSAGE', 'Restored previous shadow settings.')
+			} else {
+				emit(
+					'SHOW_MESSAGE',
+					`Couldn't restore all previous shadow settings due to a newer version. Sorry!`
+				)
+			}
 		},
-		[setBackground]
+		[]
+	)
+
+	const handleSelectionChange = useCallback((selection: Selection) => {
+		setSelection(selection)
+
+		const { derivedBackgroundColor } = selection
+		setShadowColorAndBackground(derivedBackgroundColor)
+
+		const { prevShadowEffects } = selection
+		if (prevShadowEffects) {
+			restorePrevEffectsAndSettings(prevShadowEffects)
+		}
+	}, [])
+
+	const setShadowColorAndBackground = useCallback(
+		(derivedBackgroundColor: RGBA | undefined) => {
+			let shadowColor = 'ffffff'
+			let backgroundColor = '#eee'
+			if (derivedBackgroundColor) {
+				const { r, g, b, a } = derivedBackgroundColor
+				const toHex = chroma.gl(r, g, b, a).hex()
+				// tint shadow based on bg color
+				let hsl: any = chroma(toHex).hsl()
+				// check if color has hue (ex. no white, grey, black)
+				if (isNaN(hsl[0])) {
+					hsl = [0, 0, 0]
+				} else {
+					hsl[2] = clamp(hsl[2] - 0.8, 0.1, 1) // decrease lightness
+				}
+				const color = chroma.hsl(hsl[0], hsl[1], hsl[2]).hex()
+				shadowColor = color.replace('#', '')
+				backgroundColor = toHex
+			} else {
+				shadowColor = '000000'
+			}
+			setColor(shadowColor)
+			setPreview({
+				backgroundColor
+			})
+		},
+		[]
 	)
 
 	return (

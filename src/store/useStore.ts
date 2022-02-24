@@ -1,25 +1,35 @@
 import create from 'zustand'
-import createBackground, { BackgroundState } from './createBackground'
 import createLight, { LightState } from './createLight'
 import createPreview, { PreviewState } from './createPreview'
 import createPreviewBounds, { PreviewBoundsState } from './createPreviewBounds'
 import createSelection, { SelectionState } from './createSelection'
+import createShadowColor, { ShadowColorState } from './createShadowColor'
 import createTarget, { TargetState } from './createTarget'
 
-export type Store = BackgroundState &
-	LightState &
+export type Store = LightState &
 	PreviewState &
 	PreviewBoundsState &
 	SelectionState &
-	TargetState
+	ShadowColorState &
+	TargetState & { setEntireStore: (arg: any) => void }
 
 const useStore = create<Store>((set) => ({
-	...createBackground(set),
 	...createLight(set),
 	...createPreview(set),
 	...createPreviewBounds(set),
 	...createSelection(set),
-	...createTarget(set)
+	...createShadowColor(set),
+	...createTarget(set),
+	setEntireStore: (data: Store) =>
+		set({
+			...createLight,
+			...createPreview,
+			...createPreviewBounds,
+			...createSelection,
+			...createShadowColor,
+			...createTarget,
+			...data
+		})
 }))
 
 export default useStore

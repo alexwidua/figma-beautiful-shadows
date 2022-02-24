@@ -17,18 +17,6 @@ const Menu = ({ bounds }: any) => {
 
 	const [optionsPanelOpen, setOptionsPanelOpen] = useState<boolean>(false)
 	const menuRef = useRef<any>()
-	const [menuRect, setMenuRect] = useState<Partial<DOMRect>>({
-		x: 0,
-		y: 0,
-		width: 0,
-		height: 0
-	})
-	useEffect(() => {
-		if (!menuRef.current) return
-		const rect = menuRef.current.getBoundingClientRect()
-		const { x, y, width, height } = rect
-		setMenuRect({ x, y, width, height })
-	}, [menuRef])
 
 	const applyShadowsToSelectedCanvasElement = useCallback(() => {
 		emit('APPLY')
@@ -43,19 +31,19 @@ const Menu = ({ bounds }: any) => {
 					<IconEllipsis32 />
 				</IconButton>
 				<Button
-					disabled={selection.valid !== 'VALID'}
+					disabled={selection.state !== 'VALID'}
 					onClick={applyShadowsToSelectedCanvasElement}
 					//@ts-ignore next-line
 					style={{
 						minWidth: 96,
-						opacity: selection.valid !== 'VALID' ? 0.5 : 1
+						opacity: selection.state !== 'VALID' ? 0.5 : 1
 					}}>
 					Apply
 				</Button>
 			</Columns>
 			<OptionsPanel
 				bounds={bounds}
-				anchor={menuRect}
+				anchor={menuRef}
 				open={optionsPanelOpen}
 				onClose={() => setOptionsPanelOpen(false)}
 			/>

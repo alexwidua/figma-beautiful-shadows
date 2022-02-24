@@ -1,17 +1,21 @@
 import { on, once, emit, showUI } from '@create-figma-plugin/utilities'
-import { validateSelection, SelectionValidity } from './utils/selection'
+import { validateSelection, SelectionState } from './utils/selection'
 import { getCastedShadows } from './utils/shadow'
+import { hexToGL } from './utils/color'
 import { searchForEnclosingNode } from './utils/node'
 import { WINDOW_INITIAL_WIDTH, WINDOW_INITIAL_HEIGHT } from './constants'
 
 // Types
 import { Preview } from './store/createPreview'
 import { Selection } from './store/createSelection'
+import { PreviewBounds } from './hooks/usePreviewBounds'
 
+const VERSION = 8
 const PLUGIN_DATA_KEY = 'beautiful_shadow'
 const VALID_NODE_TYPES: Array<NodeType> = [
 	'BOOLEAN_OPERATION',
 	'COMPONENT',
+	'INSTANCE',
 	'ELLIPSE',
 	'FRAME',
 	'GROUP',
@@ -23,7 +27,13 @@ const VALID_NODE_TYPES: Array<NodeType> = [
 	'VECTOR'
 ]
 
-type ErrorMessage = { [type in SelectionValidity]: string }
+export interface PluginData extends Preview {
+	version?: number
+	previewBounds: PreviewBounds
+	lightPosition: Vector
+}
+
+type ErrorMessage = { [type in SelectionState]: string }
 const ERROR_MSG: Pick<ErrorMessage, 'MULTIPLE' | 'INVALID'> = {
 	MULTIPLE: 'Select only one element or group elements together.',
 	INVALID: 'Element type not supported.'
@@ -34,7 +44,7 @@ export default function () {
 	 * The preview variable holds all shadow information.
 	 * It gets updated everytime the user makes changes in the plugin UI.
 	 */
-	let preview: Preview | undefined = undefined
+	let pluginData: PluginData | undefined = undefined
 
 	/**
 	 * The nodeRef vairable holds a reference to the currently selected node.
@@ -57,7 +67,8 @@ export default function () {
 		const pluginData = nodeRef.getPluginData(PLUGIN_DATA_KEY)
 		if (pluginData) {
 			const data: Preview = JSON.parse(pluginData)
-			emit('LOAD_EXISTING_SHADOW_DATA', data)
+			// emit('LOAD_EXISTING_SHADOW_DATA', data)
+			return data
 		}
 	}
 
@@ -72,30 +83,33 @@ export default function () {
 	 */
 	function handleSelectionChange(): void {
 		const selection = figma.currentPage.selection
-		const valid: SelectionValidity = validateSelection(
+		const state: SelectionState = validateSelection(
 			selection,
 			VALID_NODE_TYPES
 		)
-		if (valid === 'EMPTY') {
+		if (state === 'EMPTY') {
 			cleanUpAndRestorePrevEffects()
-		} else if (valid === 'MULTIPLE' || valid === 'INVALID') {
+		} else if (state === 'MULTIPLE' || state === 'INVALID') {
 			cleanUpAndRestorePrevEffects()
-			figma.notify(ERROR_MSG[valid])
-		} else if (valid === 'VALID') {
+			figma.notify(ERROR_MSG[state])
+		} else if (state === 'VALID') {
 			if (nodeRef) cleanUpAndRestorePrevEffects()
 			nodeRef = selection[0]
-			checkIfExistingShadowData()
+			// checkIfExistingShadowData()
 			existingNodeEffects = nodeRef.effects
-			drawShadows()
 		}
 		if (nodeRef?.removed) return
-		tryToDeriveBGColorFromCanvas(valid !== 'VALID')
+
 		const data: Selection = {
-			valid,
+			state,
 			type: nodeRef?.type || undefined,
 			width: nodeRef?.width || 0,
 			height: nodeRef?.height || 0,
-			cornerRadius: nodeRef?.cornerRadius || 0
+			cornerRadius: nodeRef?.cornerRadius || 0,
+			derivedBackgroundColor: tryToDeriveBGColorFromCanvas(
+				state !== 'VALID'
+			),
+			prevShadowEffects: checkIfExistingShadowData()
 		}
 		emit('SELECTION_CHANGE', data)
 	}
@@ -103,23 +117,25 @@ export default function () {
 	/**
 	 * Try to 'derive' a background color by searching for a node that encloses the selected node.
 	 */
-	function tryToDeriveBGColorFromCanvas(skip: boolean): void {
+	function tryToDeriveBGColorFromCanvas(skip: boolean): RGBA | undefined {
 		if (nodeRef?.removed) return
 		if (!nodeRef) return
-		let color: SolidPaint | undefined
-
-		if (!skip) {
+		if (skip) {
+			return undefined
+		} else {
 			const hasOverlappingNode = searchForEnclosingNode(
 				figma.currentPage,
 				nodeRef
 			)
-			if (hasOverlappingNode)
-				color =
+			if (hasOverlappingNode) {
+				const fill =
 					hasOverlappingNode.fills[
 						hasOverlappingNode.fills.length - 1
 					]
+				const { color, opacity } = fill
+				return { r: color.r, g: color.g, b: color.b, a: opacity }
+			}
 		}
-		emit('DERIVED_BACKGROUND_COLOR_FROM_CANVAS', color)
 	}
 
 	/**
@@ -127,17 +143,17 @@ export default function () {
 	 */
 	function drawShadows(): void {
 		if (nodeRef?.removed) return
-		if (!nodeRef || !preview) return
-
-		const { azimuth, distance, elevation, brightness, backgroundColor } =
-			preview
+		if (!nodeRef || !pluginData) return
+		const { azimuth, distance, elevation, brightness, shadowColor } =
+			pluginData
+		const color = hexToGL(shadowColor)
 		const shadows = getCastedShadows({
 			numShadows: 6,
 			azimuth,
 			distance,
 			elevation,
 			brightness,
-			backgroundColor,
+			color,
 			size: { width: nodeRef.width, height: nodeRef.height }
 		})
 		const stripExistingShadowEffects = nodeRef.effects.filter(
@@ -146,8 +162,8 @@ export default function () {
 		nodeRef.effects = [...stripExistingShadowEffects, ...shadows]
 	}
 
-	function updateSceneAndRedrawShadows(data: Preview): void {
-		preview = data
+	function updateSceneAndRedrawShadows(data: any): void {
+		pluginData = data
 		drawShadows()
 	}
 
@@ -164,7 +180,10 @@ export default function () {
 	figma.on('selectionchange', handleSelectionChange)
 	figma.on('close', function () {
 		if (APPLIED_SHADOW_EFFECTS) {
-			nodeRef.setPluginData(PLUGIN_DATA_KEY, JSON.stringify(preview))
+			nodeRef.setPluginData(
+				PLUGIN_DATA_KEY,
+				JSON.stringify({ ...pluginData, version: VERSION })
+			)
 			nodeRef.setRelaunchData({
 				editShadow: `Edit the shadow effect with Beautiful Shadows`
 			})
@@ -174,6 +193,7 @@ export default function () {
 	/**
 	 * Listen and act on updates from the UI side
 	 */
+	on('SHOW_MESSAGE', (msg: string) => figma.notify(msg))
 	on('UPDATE_SHADOWS', updateSceneAndRedrawShadows)
 	on(
 		'RESIZE_WINDOW',

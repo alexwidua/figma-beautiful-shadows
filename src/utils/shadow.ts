@@ -7,13 +7,9 @@
  * read about designing shadows in CSS: https://www.joshwcomeau.com/css/designing-shadows/
  */
 
-import { clamp, normalize, round, degreeToRadian } from './math'
+import { normalize, round, degreeToRadian } from './math'
 import { easeQuadOut, easeQuadIn, easeCubicInOut } from 'd3-ease'
-import chroma from 'chroma-js'
 import { SHADOW_BASE_BLUR } from '../constants'
-
-type RGBAArray = [number, number, number, number]
-type HSLArray = [number, number, number]
 
 interface ShadowParameter {
 	numShadows: number
@@ -21,7 +17,7 @@ interface ShadowParameter {
 	distance: number
 	elevation: number
 	brightness: number
-	backgroundColor: string
+	color: RGBA
 	size: { width: number; height: number }
 }
 
@@ -31,7 +27,7 @@ export function getCastedShadows({
 	distance,
 	elevation,
 	brightness,
-	backgroundColor,
+	color,
 	size
 }: ShadowParameter): DropShadowEffect[] {
 	const azimuthRad = degreeToRadian(azimuth)
@@ -47,20 +43,6 @@ export function getCastedShadows({
 	const scale = distance * factor // 20 -> arbitrary value that felt good
 
 	const increaseRadiusWithDistance = Math.max(scale / 100, 0.1) // values are purely based on gut feel
-
-	/**
-	 * Tint shadows
-	 */
-	let color: RGBAArray = [0, 0, 0, 0]
-	if (backgroundColor) {
-		let hsl: HSLArray = chroma(backgroundColor).hsl()
-
-		// check if color has hue (ex. no white, grey, black)
-		if (isNaN(hsl[0])) hsl = [0, 0, 0]
-		else hsl[2] = clamp(hsl[2] - 0.8, 0.1, 1) // decrease lightness
-
-		color = chroma.hsl(hsl[0], hsl[1], hsl[2]).gl()
-	}
 
 	const shadows: DropShadowEffect[] = Array.from(
 		{ length: numShadows },
@@ -91,12 +73,7 @@ export function getCastedShadows({
 				type: 'DROP_SHADOW',
 				blendMode: 'NORMAL',
 				visible: true,
-				color: {
-					r: color[0],
-					g: color[1],
-					b: color[2],
-					a
-				},
+				color: { ...color, a },
 				offset: {
 					x,
 					y
