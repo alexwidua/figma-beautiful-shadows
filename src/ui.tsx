@@ -69,10 +69,6 @@ const Plugin = () => {
 			const type = pluginData.shadowType || SHADOW_DEFAULT_TYPE
 			const brightness = pluginData.brightness || LIGHT_INITIAL_BRIGHTNESS
 			const elevation = pluginData.elevation || TARGET_INITIAL_ELEVATION
-			const previewBounds = pluginData.previewBounds || {
-				width: WINDOW_INITIAL_WIDTH,
-				height: WINDOW_INITIAL_HEIGHT
-			}
 
 			const lightData: Pick<Light, 'x' | 'y' | 'brightness'> = {
 				x,
@@ -88,9 +84,13 @@ const Plugin = () => {
 				target: { ...target, ...targetData }
 			})
 
-			const restoreWindowSize = previewBounds || {
-				width: WINDOW_INITIAL_WIDTH,
-				height: WINDOW_INITIAL_HEIGHT
+			const restoreWindowSize = {
+				width:
+					Math.round(pluginData.previewBounds?.width) ||
+					WINDOW_INITIAL_WIDTH,
+				height:
+					Math.round(pluginData.previewBounds?.height) ||
+					WINDOW_INITIAL_HEIGHT
 			}
 			emit('RESIZE_WINDOW', restoreWindowSize)
 
