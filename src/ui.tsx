@@ -20,6 +20,7 @@ import {
 	LIGHT_INITIAL_BRIGHTNESS,
 	TARGET_INITIAL_ELEVATION,
 	SHADOW_DEFAULT_COLOR,
+	SHADOW_DEFAULT_TYPE,
 	BACKGROUND_DEFAULT_COLOR
 } from './constants'
 
@@ -64,7 +65,8 @@ const Plugin = () => {
 			if (!pluginData) return
 			const x = pluginData.lightPosition?.x || LIGHT_INITIAL_POSITION.x
 			const y = pluginData.lightPosition?.y || LIGHT_INITIAL_POSITION.y
-			const color = pluginData.shadowColor || '#000'
+			const color = pluginData.shadowColor || SHADOW_DEFAULT_COLOR
+			const type = pluginData.shadowType || SHADOW_DEFAULT_TYPE
 			const brightness = pluginData.brightness || LIGHT_INITIAL_BRIGHTNESS
 			const elevation = pluginData.elevation || TARGET_INITIAL_ELEVATION
 			const previewBounds = pluginData.previewBounds || {
@@ -81,6 +83,7 @@ const Plugin = () => {
 
 			setEntireStore({
 				color,
+				type,
 				light: { ...light, ...lightData },
 				target: { ...target, ...targetData }
 			})

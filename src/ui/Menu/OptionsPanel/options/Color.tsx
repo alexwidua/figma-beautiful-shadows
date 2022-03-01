@@ -1,15 +1,14 @@
-import { h } from 'preact'
-import { useState } from 'preact/hooks'
+import { h, JSX } from 'preact'
 import useStore from '../../../../store/useStore'
 import { TextboxColor } from '@alexwidua/create-figma-plugin-components'
 
-const ShadowColor = () => {
+const Color = () => {
 	const { color, setColor } = useStore((state) => ({
 		color: state.color,
 		setColor: state.setColor
 	}))
 
-	function handleHexColorInput(event: any) {
+	function handleHexColorInput(event: JSX.TargetedEvent<HTMLInputElement>) {
 		const newHexColor = event.currentTarget.value
 		setColor(newHexColor)
 	}
@@ -26,4 +25,4 @@ const ShadowColor = () => {
 	)
 }
 
-export default ShadowColor
+export default Color

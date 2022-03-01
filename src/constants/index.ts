@@ -1,3 +1,5 @@
+import { ShadowType } from '../store/createShadowProps'
+
 /**
  * Plugin window
  */
@@ -39,6 +41,7 @@ export const BACKGROUND_DEFAULT_COLOR = '#e5e5e5'
  * Shadow
  */
 export const SHADOW_DEFAULT_COLOR = '000000'
+export const SHADOW_DEFAULT_TYPE: ShadowType = 'DROP_SHADOW'
 export const SHADOW_BASE_BLUR = 50
 
 /**

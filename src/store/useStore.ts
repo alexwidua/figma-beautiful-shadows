@@ -3,14 +3,14 @@ import createLight, { LightState } from './createLight'
 import createPreview, { PreviewState } from './createPreview'
 import createPreviewBounds, { PreviewBoundsState } from './createPreviewBounds'
 import createSelection, { SelectionState } from './createSelection'
-import createShadowColor, { ShadowColorState } from './createShadowColor'
+import createShadowProps, { ShadowProps } from './createShadowProps'
 import createTarget, { TargetState } from './createTarget'
 
 export type Store = LightState &
 	PreviewState &
 	PreviewBoundsState &
 	SelectionState &
-	ShadowColorState &
+	ShadowProps &
 	TargetState & { setEntireStore: (arg: any) => void }
 
 const useStore = create<Store>((set) => ({
@@ -18,7 +18,7 @@ const useStore = create<Store>((set) => ({
 	...createPreview(set),
 	...createPreviewBounds(set),
 	...createSelection(set),
-	...createShadowColor(set),
+	...createShadowProps(set),
 	...createTarget(set),
 	setEntireStore: (data: Store) =>
 		set({
@@ -26,7 +26,7 @@ const useStore = create<Store>((set) => ({
 			...createPreview,
 			...createPreviewBounds,
 			...createSelection,
-			...createShadowColor,
+			...createShadowProps,
 			...createTarget,
 			...data
 		})

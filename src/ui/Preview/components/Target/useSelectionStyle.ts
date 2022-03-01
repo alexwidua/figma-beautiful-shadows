@@ -35,6 +35,8 @@ const useSelectionStyle = () => {
 			: '1px solid rgba(0,0,0,0.2)',
 		width: elementWidth || TARGET_WIDTH,
 		height: elementHeight || TARGET_HEIGHT,
+		minWidth: 32,
+		minHeight: 32,
 		borderRadius: cornerRadius * ratio || 4
 	}
 	return selectionStyles

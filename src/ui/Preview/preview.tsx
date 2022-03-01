@@ -36,6 +36,7 @@ const Preview = forwardRef<any>(({ children }: any, ref) => {
 	 * 💾 Store
 	 */
 	const {
+		type,
 		color,
 		backgroundColor,
 		light,
@@ -48,6 +49,7 @@ const Preview = forwardRef<any>(({ children }: any, ref) => {
 		setPreviewBounds
 	} = useStore((state) => ({
 		color: state.color,
+		type: state.type,
 		backgroundColor: state.preview.backgroundColor,
 		light: state.light,
 		target: state.target,
@@ -77,6 +79,7 @@ const Preview = forwardRef<any>(({ children }: any, ref) => {
 		const elevation = target.elevation
 		const brightness = light.brightness
 		const shadowColor = color
+		const shadowType = type
 
 		const update: Preview = {
 			azimuth,
@@ -84,7 +87,7 @@ const Preview = forwardRef<any>(({ children }: any, ref) => {
 			elevation,
 			brightness,
 			shadowColor,
-			backgroundColor
+			shadowType
 		}
 		setPreview(update)
 
@@ -94,7 +97,7 @@ const Preview = forwardRef<any>(({ children }: any, ref) => {
 			previewBounds
 		}
 		debounceCanvasUpdate(pluginData)
-	}, [light, target, color, selection, previewBounds])
+	}, [light, target, color, type, selection, previewBounds])
 
 	const debounceCanvasUpdate = useCallback(
 		debounce(

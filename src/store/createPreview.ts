@@ -5,6 +5,7 @@ import {
 	LIGHT_INITIAL_BRIGHTNESS,
 	BACKGROUND_DEFAULT_COLOR
 } from '../constants'
+import { ShadowType } from './createShadowProps'
 
 export type Preview = {
 	azimuth: number
@@ -12,7 +13,8 @@ export type Preview = {
 	elevation: number
 	brightness: number
 	shadowColor: string
-	backgroundColor: string
+	shadowType: ShadowType
+	backgroundColor?: string
 }
 export interface PreviewState {
 	preview: Preview
@@ -25,7 +27,8 @@ const createPreview = (set: SetState<Store>) => ({
 		distance: 0,
 		elevation: TARGET_INITIAL_ELEVATION,
 		brightness: LIGHT_INITIAL_BRIGHTNESS,
-		shadowColor: '#eee',
+		shadowColor: '000000',
+		shadowType: 'DROP_SHADOW' as ShadowType,
 		backgroundColor: BACKGROUND_DEFAULT_COLOR
 	},
 	setPreview: (preview: Preview | Partial<Preview>) =>

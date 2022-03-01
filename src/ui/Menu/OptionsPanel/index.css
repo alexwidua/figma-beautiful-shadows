@@ -2,3 +2,7 @@
 	display: flex;
 	align-items: center;
 }
+
+.row:first-child {
+	margin-right: 16px !important;
+}

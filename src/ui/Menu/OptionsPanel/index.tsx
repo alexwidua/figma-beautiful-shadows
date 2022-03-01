@@ -7,13 +7,15 @@ import {
 } from '@create-figma-plugin/ui'
 // import Panel from './Panel'
 import Parameters from './options/Parameters'
-import ShadowColor from './options/ShadowColor'
-import { Panel } from '@alexwidua/create-figma-plugin-components'
+import Color from './options/Color'
+import Type from './options/Type'
+import { Panel } from './Panel'
 import styles from './index.css'
 
 const Options = ({ bounds, anchor, open, onClose }: any) => {
 	return (
 		<Panel
+			title={<Type />}
 			boundsRef={bounds}
 			anchorRef={anchor}
 			open={open}
@@ -26,21 +28,8 @@ const Options = ({ bounds, anchor, open, onClose }: any) => {
 					<Parameters />
 				</div>
 				<VerticalSpace space={'small'} />
-				<Divider
-					style={{
-						//@ts-ignore next-line
-						marginLeft: 'calc(var(--space-small)*-1)',
-						//@ts-ignore next-line
-						width: 'calc(100% + (var(--space-small)*2))'
-					}}
-				/>
-				<VerticalSpace space={'medium'} />
-				<Text bold>Shadow Color</Text>
-				<VerticalSpace space={'medium'} />
-				<div className={styles.row}>
-					<ShadowColor />
-				</div>
-				<VerticalSpace space={'medium'} />
+				<Color />
+				<VerticalSpace space={'small'} />
 			</Container>
 		</Panel>
 	)

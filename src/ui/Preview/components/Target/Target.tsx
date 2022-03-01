@@ -14,11 +14,13 @@ const Target = ({ ...rest }) => {
 	/**
 	 * 💾 Store
 	 */
-	const { elevation, elevationPointerDown } = useStore((state) => ({
-		elevation: state.target.elevation,
-		elevationPointerDown: state.target.elevationPointerDown,
-		preview: state.preview
-	}))
+	const { elevation, elevationPointerDown, toggleShadowType } = useStore(
+		(state) => ({
+			elevation: state.target.elevation,
+			elevationPointerDown: state.target.elevationPointerDown,
+			toggleShadowType: state.toggleType
+		})
+	)
 	const [scale, slide] = useElevationSlider()
 	const selectionStyle = useSelectionStyle()
 	const shadowStyle = useShadowStyle()
@@ -46,6 +48,7 @@ const Target = ({ ...rest }) => {
 					transform: 'translate3d(-50%,-50%,0)',
 					scale: to([scale], (s) => s)
 				}}
+				onDoubleClickCapture={() => toggleShadowType()}
 				//@ts-ignore next-line
 				{...slide()}
 				{...rest}

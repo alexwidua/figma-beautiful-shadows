@@ -1,92 +1,129 @@
-import { h } from 'preact'
-import useStore from '../../../store/useStore'
+/**
+ * @file This file is taken from the '@alexwidua/create-figma-plugin-components' and
+ * makes some minor changes to the title bar prop
+ *
+ * TODO: Update '@alexwidua/create-figma-plugin-components' to avoid redundancy
+ */
+import { h, ComponentChildren, RefObject } from 'preact'
 import { useState, useEffect, useRef } from 'preact/hooks'
 import { useDrag } from '@use-gesture/react'
 import { useSpring, animated } from '@react-spring/web'
 import {
-	Text,
+	createClassName,
 	IconButton,
-	VerticalSpace,
 	IconCross32
 } from '@create-figma-plugin/ui'
+import { CSSProperties } from 'react'
 import styles from './panel.css'
 
-const Panel = ({ bounds, anchor, open, onClose, children }: any) => {
-	const { previewBounds } = useStore((state: any) => ({
-		previewBounds: state.previewBounds
-	}))
+export interface PanelProps {
+	open: boolean
+	title?: ComponentChildren
+	children: ComponentChildren
+	boundsRef: RefObject<HTMLDivElement>
+	anchorRef: RefObject<HTMLDivElement>
+	anchorMargin?: number
+	anchorAlign?: 'LEFT' | 'RIGHT'
+	onClose: () => void
+	style?: CSSProperties
+}
 
-	const panelRef = useRef<any>()
-	const [panelRect, setPanelRect] = useState({
-		x: 0,
-		y: 0,
-		width: 0,
-		height: 0
-	})
-
-	useEffect(() => {
-		if (!panelRef.current) return
-		const rect = panelRef.current.getBoundingClientRect()
-		setPanelRect({
-			x: rect.x,
-			y: rect.y,
-			width: rect.width,
-			height: rect.height
-		})
-	}, [panelRef, previewBounds])
+export function Panel({
+	open,
+	title = 'Options',
+	boundsRef,
+	anchorRef,
+	anchorMargin = 8,
+	anchorAlign = 'LEFT',
+	onClose,
+	children,
+	...rest
+}: PanelProps) {
+	const panelRef = useRef<HTMLDivElement>(null)
 
 	/**
-	 * ✋ Handle drag gesture and translation
+	 * Spawn panel above anchorRef element
 	 */
+	useEffect(() => {
+		if (!anchorRef?.current || !panelRef?.current) return
+		const anchorRect = anchorRef.current.getBoundingClientRect()
+		const panelRect = panelRef.current.getBoundingClientRect()
+
+		const alignXToAnchorLeft =
+			anchorRect.x + panelRect.width - window.innerWidth
+		const alignXToAnchorRight =
+			anchorRect.x + anchorRect.width - window.innerWidth
+		const y = anchorRect.y - window.innerHeight - anchorMargin
+
+		animate.set({
+			x:
+				anchorAlign === 'LEFT'
+					? alignXToAnchorLeft
+					: alignXToAnchorRight,
+			y
+		})
+	}, [panelRef, open])
+
 	const [{ x, y }, animate] = useSpring(() => ({ x: 0, y: 0 }))
-	const drag: any = useDrag(
+	const drag = useDrag(
 		({ offset: [ox, oy] }) => {
 			animate.set({ x: ox, y: oy })
 		},
 		{
-			bounds,
+			bounds: boundsRef,
 			from: () => [x.get(), y.get()]
 		}
 	)
 
-	// Spawn panel anchored to another element
+	/**
+	 * Keep panel in bounds when plugin window is resizeable
+	 */
+	const [boundsRect, setBoundsRect] = useState({ width: 0, height: 0 })
 	useEffect(() => {
-		const padding = 8
-		animate.set({ x: 0, y: 0 - panelRect.height - padding })
-	}, [panelRect, anchor, open])
+		const handleResize = () => {
+			if (!boundsRef?.current) return
+			const rect = boundsRef.current.getBoundingClientRect()
+			setBoundsRect({ width: rect.width, height: rect.height })
+		}
+		window.addEventListener('resize', handleResize)
+		return () => {
+			window.removeEventListener('resize', handleResize)
+		}
+	}, [])
+	useEffect(() => {
+		if (!panelRef.current || !boundsRect.width || !boundsRect.height) return
 
-	useEffect(() => {
-		if (!previewBounds.width || !previewBounds.height) return
-		const tresholdX = 0 - previewBounds.width + panelRect.width
-		const tresholdY = 0 - previewBounds.height + panelRect.height
-		const OOBx = x.get() < 0 - previewBounds.width + panelRect.width
-		const OOBy = y.get() < 0 - previewBounds.height + panelRect.height
-		const padding = 32
-		if (OOBx && OOBy)
-			animate.start({ x: tresholdX + padding, y: tresholdY + padding })
-		else if (OOBx) animate.start({ x: tresholdX + padding })
-		else if (OOBy) animate.start({ y: tresholdY + padding })
-	}, [previewBounds.width, previewBounds.height])
+		const panelRect = panelRef.current.getBoundingClientRect()
+		const outOfBoundsX =
+			Math.abs(x.get() - panelRect.width) > window.innerWidth
+		const outOfBoundsY =
+			Math.abs(y.get() - panelRect.height) > window.innerHeight
+
+		animate.set({
+			x: outOfBoundsX ? 0 - window.innerWidth + panelRect.width : x.get(),
+			y: outOfBoundsY
+				? 0 - window.innerHeight + panelRect.height
+				: y.get()
+		})
+	}, [boundsRect])
 
 	return (
 		<animated.div
-			class={`
-			${styles.panel} 
-			${open ? styles.open : undefined}
-			`}
+			className={createClassName([
+				styles.panel,
+				open ? styles.open : null
+			])}
 			style={{ x, y }}
 			ref={panelRef}
-			{...drag()}>
-			<div class={styles.navbar}>
-				<Text bold>Options</Text>
+			{...drag()}
+			{...rest}>
+			<div className={styles.titlebar}>
+				{title}
 				<IconButton onChange={onClose} value={false}>
 					<IconCross32 />
 				</IconButton>
 			</div>
-			<VerticalSpace space={'small'} />
 			{children}
 		</animated.div>
 	)
 }
-
-export default Panel

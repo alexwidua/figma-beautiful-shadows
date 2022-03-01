@@ -10,7 +10,7 @@ import { Preview } from './store/createPreview'
 import { Selection } from './store/createSelection'
 import { PreviewBounds } from './hooks/usePreviewBounds'
 
-const VERSION = 10
+const VERSION = 11
 const PLUGIN_DATA_KEY = 'beautiful_shadow'
 const VALID_NODE_TYPES: Array<NodeType> = [
 	'BOOLEAN_OPERATION',
@@ -138,6 +138,7 @@ export default function () {
 					hasOverlappingNode.fills[
 						hasOverlappingNode.fills.length - 1
 					]
+
 				if (!fill || !fill.color || !fill.opacity) return undefined
 				const { color, opacity } = fill
 				return { r: color.r, g: color.g, b: color.b, a: opacity }
@@ -151,8 +152,14 @@ export default function () {
 	function drawShadows(): void {
 		if (nodeRef?.removed) return
 		if (!nodeRef || !pluginData) return
-		const { azimuth, distance, elevation, brightness, shadowColor } =
-			pluginData
+		const {
+			azimuth,
+			distance,
+			elevation,
+			brightness,
+			shadowColor,
+			shadowType
+		} = pluginData
 		const color = hexToGL(shadowColor)
 		const shadows = getCastedShadows({
 			numShadows: 6,
@@ -161,10 +168,12 @@ export default function () {
 			elevation,
 			brightness,
 			color,
+			shadowType,
 			size: { width: nodeRef.width, height: nodeRef.height }
 		})
 		const stripExistingShadowEffects = nodeRef.effects.filter(
-			(effect: Effect) => effect.type !== 'DROP_SHADOW'
+			(effect: Effect) =>
+				effect.type !== 'DROP_SHADOW' && effect.type !== 'INNER_SHADOW'
 		)
 		nodeRef.effects = [...stripExistingShadowEffects, ...shadows]
 	}

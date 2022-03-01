@@ -10,6 +10,7 @@
 import { normalize, round, degreeToRadian } from './math'
 import { easeQuadOut, easeQuadIn, easeCubicInOut } from 'd3-ease'
 import { SHADOW_BASE_BLUR } from '../constants'
+import { ShadowType } from '../store/createShadowProps'
 
 interface ShadowParameter {
 	numShadows: number
@@ -18,6 +19,7 @@ interface ShadowParameter {
 	elevation: number
 	brightness: number
 	color: RGBA
+	shadowType: ShadowType
 	size: { width: number; height: number }
 }
 
@@ -28,8 +30,9 @@ export function getCastedShadows({
 	elevation,
 	brightness,
 	color,
+	shadowType,
 	size
-}: ShadowParameter): DropShadowEffect[] {
+}: ShadowParameter): DropShadowEffect[] | InnerShadowEffect[] {
 	const azimuthRad = degreeToRadian(azimuth)
 
 	/**
@@ -44,9 +47,10 @@ export function getCastedShadows({
 
 	const increaseRadiusWithDistance = Math.max(scale / 100, 0.1) // values are purely based on gut feel
 
-	const shadows: DropShadowEffect[] = Array.from(
+	const shadows: DropShadowEffect[] | InnerShadowEffect[] = Array.from(
 		{ length: numShadows },
 		(_, i) => {
+			const type: any = shadowType
 			// opacity/ shadow alpha
 			const easeOpacity = easeCubicInOut(normalize(i, 0, numShadows))
 			const a = round(brightness - brightness * easeOpacity, 2)
@@ -70,7 +74,7 @@ export function getCastedShadows({
 			)
 
 			return {
-				type: 'DROP_SHADOW',
+				type,
 				blendMode: 'NORMAL',
 				visible: true,
 				color: { ...color, a },
