@@ -9,7 +9,8 @@ export function searchForEnclosingNode(
 		// if frame, assume that frame background is the background color
 		if (
 			node.type === 'FRAME' &&
-			node.children?.find((node) => node.id === ref.id)
+			node.children?.find((node) => node.id === ref.id) &&
+			node.fills
 		) {
 			return node
 		}

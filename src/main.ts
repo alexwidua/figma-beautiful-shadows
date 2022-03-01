@@ -138,7 +138,7 @@ export default function () {
 					hasOverlappingNode.fills[
 						hasOverlappingNode.fills.length - 1
 					]
-				if (!fill.color || !fill.opacity) return undefined
+				if (!fill || !fill.color || !fill.opacity) return undefined
 				const { color, opacity } = fill
 				return { r: color.r, g: color.g, b: color.b, a: opacity }
 			}
