@@ -10,7 +10,7 @@ import { Preview } from './store/createPreview'
 import { Selection } from './store/createSelection'
 import { PreviewBounds } from './hooks/usePreviewBounds'
 
-const VERSION = 8
+const VERSION = 10
 const PLUGIN_DATA_KEY = 'beautiful_shadow'
 const VALID_NODE_TYPES: Array<NodeType> = [
 	'BOOLEAN_OPERATION',
@@ -62,12 +62,16 @@ export default function () {
 	/**
 	 * Check if node has previously set shadow data and load
 	 */
-	function checkIfExistingShadowData() {
+	function checkIfExistingShadowData(): PluginData | undefined {
 		if (!nodeRef) return
 		const pluginData = nodeRef.getPluginData(PLUGIN_DATA_KEY)
 		if (pluginData) {
-			const data: Preview = JSON.parse(pluginData)
-			// emit('LOAD_EXISTING_SHADOW_DATA', data)
+			let data: PluginData
+			try {
+				data = JSON.parse(pluginData)
+			} catch (e) {
+				return
+			}
 			return data
 		}
 	}
@@ -134,6 +138,7 @@ export default function () {
 					hasOverlappingNode.fills[
 						hasOverlappingNode.fills.length - 1
 					]
+				if (!fill.color || !fill.opacity) return undefined
 				const { color, opacity } = fill
 				return { r: color.r, g: color.g, b: color.b, a: opacity }
 			}
@@ -164,7 +169,7 @@ export default function () {
 		nodeRef.effects = [...stripExistingShadowEffects, ...shadows]
 	}
 
-	function updateSceneAndRedrawShadows(data: any): void {
+	function updateSceneAndRedrawShadows(data: PluginData): void {
 		pluginData = data
 		drawShadows()
 	}
