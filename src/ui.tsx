@@ -17,6 +17,8 @@ import {
 	WINDOW_MIN_HEIGHT,
 	WINDOW_MAX_HEIGHT,
 	LIGHT_INITIAL_POSITION,
+	LIGHT_INITIAL_BRIGHTNESS,
+	TARGET_INITIAL_ELEVATION,
 	SHADOW_DEFAULT_COLOR,
 	BACKGROUND_DEFAULT_COLOR
 } from './constants'
@@ -59,26 +61,30 @@ const Plugin = () => {
 
 	const restorePrevEffectsAndSettings = useCallback(
 		(pluginData: PluginData) => {
-			const {
-				lightPosition,
-				shadowColor,
-				brightness,
-				elevation,
-				previewBounds
-			} = pluginData
-			const x = lightPosition?.x || LIGHT_INITIAL_POSITION.x
-			const y = lightPosition?.y || LIGHT_INITIAL_POSITION.y
+			if (!pluginData) return
+			const x = pluginData.lightPosition?.x || LIGHT_INITIAL_POSITION.x
+			const y = pluginData.lightPosition?.y || LIGHT_INITIAL_POSITION.y
+			const color = pluginData.shadowColor || '#000'
+			const brightness = pluginData.brightness || LIGHT_INITIAL_BRIGHTNESS
+			const elevation = pluginData.elevation || TARGET_INITIAL_ELEVATION
+			const previewBounds = pluginData.previewBounds || {
+				width: WINDOW_INITIAL_WIDTH,
+				height: WINDOW_INITIAL_HEIGHT
+			}
+
 			const lightData: Pick<Light, 'x' | 'y' | 'brightness'> = {
 				x,
 				y,
 				brightness
 			}
 			const targetData: Pick<Target, 'elevation'> = { elevation }
+
 			setEntireStore({
-				color: shadowColor || '#000',
+				color,
 				light: { ...light, ...lightData },
 				target: { ...target, ...targetData }
 			})
+
 			const restoreWindowSize = previewBounds || {
 				width: WINDOW_INITIAL_WIDTH,
 				height: WINDOW_INITIAL_HEIGHT
@@ -86,13 +92,13 @@ const Plugin = () => {
 			emit('RESIZE_WINDOW', restoreWindowSize)
 
 			// Shadows created in version =<9 don't have the lightPosition property
-			if (lightPosition !== undefined) {
-				emit('SHOW_MESSAGE', 'Restored previous shadow settings.')
-			} else {
+			if (Object.keys(pluginData).length < 5) {
 				emit(
 					'SHOW_MESSAGE',
 					`Couldn't restore all previous shadow settings due to a newer version. Sorry!`
 				)
+			} else {
+				emit('SHOW_MESSAGE', 'Restored previous shadow settings.')
 			}
 		},
 		[]
