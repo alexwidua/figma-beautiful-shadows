@@ -87,13 +87,12 @@ export default function () {
    */
   function handleSelectionChange(): void {
     const selection = figma.currentPage.selection;
-    const state: SelectionState = validateSelection(
-      selection,
-      VALID_NODE_TYPES
-    );
+    const state: SelectionState = validateSelection(selection, VALID_NODE_TYPES);
     if (state === "EMPTY") {
+      console.error("*** Invalid selection (empty)");
       cleanUpAndRestorePrevEffects();
     } else if (state === "MULTIPLE" || state === "INVALID") {
+      console.error("*** Invalid selection (multiple or invalid)");
       cleanUpAndRestorePrevEffects();
       figma.notify(ERROR_MSG[state]);
     } else if (state === "VALID" || state === "IS_WITHIN_COMPONENT") {
@@ -108,10 +107,9 @@ export default function () {
       type: nodeRef?.type || undefined,
       width: nodeRef?.width || 0,
       height: nodeRef?.height || 0,
-      cornerRadius: !isSymbol(nodeRef?.cornerRadius)
-        ? nodeRef?.cornerRadius
-        : 0,
-      // TODO: Fix this
+      cornerRadius: !isSymbol(nodeRef?.cornerRadius) ? nodeRef?.cornerRadius : 0,
+      // TODO: Disabled because it caused problems with new introduced node types, should fix this soon.
+      //
       // derivedBackgroundColor: tryToDeriveBGColorFromCanvas(
       // 	state !== 'VALID'
       // ),
@@ -126,26 +124,22 @@ export default function () {
    * Try to 'derive' a background color by searching for a node that encloses the selected node.
    */
   // TODO // Note 20230507: Removed for now because it causes issues with some node types. Need to look into this when more time...
-  function tryToDeriveBGColorFromCanvas(skip: boolean): RGBA | undefined {
-    if (nodeRef?.removed) return;
-    if (!nodeRef) return;
-    if (skip) {
-      return undefined;
-    } else {
-      const hasOverlappingNode = searchForEnclosingNode(
-        figma.currentPage,
-        nodeRef
-      );
-      if (hasOverlappingNode) {
-        const fill =
-          hasOverlappingNode.fills[hasOverlappingNode.fills.length - 1];
+  // function tryToDeriveBGColorFromCanvas(skip: boolean): RGBA | undefined {
+  //   if (nodeRef?.removed) return;
+  //   if (!nodeRef) return;
+  //   if (skip) {
+  //     return undefined;
+  //   } else {
+  //     const hasOverlappingNode = searchForEnclosingNode(figma.currentPage, nodeRef);
+  //     if (hasOverlappingNode) {
+  //       const fill = hasOverlappingNode.fills[hasOverlappingNode.fills.length - 1];
 
-        if (!fill || !fill.color || !fill.opacity) return undefined;
-        const { color, opacity } = fill;
-        return { r: color.r, g: color.g, b: color.b, a: opacity };
-      }
-    }
-  }
+  //       if (!fill || !fill.color || !fill.opacity) return undefined;
+  //       const { color, opacity } = fill;
+  //       return { r: color.r, g: color.g, b: color.b, a: opacity };
+  //     }
+  //   }
+  // }
 
   /**
    * Draw shadows ☀️
@@ -153,14 +147,7 @@ export default function () {
   function drawShadows(): void {
     if (nodeRef?.removed) return;
     if (!nodeRef || !pluginData) return;
-    const {
-      azimuth,
-      distance,
-      elevation,
-      brightness,
-      shadowColor,
-      shadowType,
-    } = pluginData;
+    const { azimuth, distance, elevation, brightness, shadowColor, shadowType } = pluginData;
     const color = hexToGL(shadowColor);
     const shadows = getCastedShadows({
       numShadows: 6,
@@ -173,8 +160,7 @@ export default function () {
       size: { width: nodeRef.width, height: nodeRef.height },
     });
     const stripExistingShadowEffects = nodeRef.effects.filter(
-      (effect: Effect) =>
-        effect.type !== "DROP_SHADOW" && effect.type !== "INNER_SHADOW"
+      (effect: Effect) => effect.type !== "DROP_SHADOW" && effect.type !== "INNER_SHADOW"
     );
     nodeRef.effects = [...stripExistingShadowEffects, ...shadows];
   }
@@ -197,10 +183,7 @@ export default function () {
   figma.on("selectionchange", handleSelectionChange);
   figma.on("close", function () {
     if (APPLIED_SHADOW_EFFECTS) {
-      nodeRef.setPluginData(
-        PLUGIN_DATA_KEY,
-        JSON.stringify({ ...pluginData, version: VERSION })
-      );
+      nodeRef.setPluginData(PLUGIN_DATA_KEY, JSON.stringify({ ...pluginData, version: VERSION }));
       nodeRef.setRelaunchData({
         editShadow: `Edit the shadow effect with Beautiful Shadows`,
       });
