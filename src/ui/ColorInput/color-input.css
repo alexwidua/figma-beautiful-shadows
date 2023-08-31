@@ -1,0 +1,71 @@
+.colorSwatch {
+  position: absolute;
+  z-index: var(--z-index-1);
+  bottom: 1.5rem;
+  left: 1.5rem;
+}
+
+.colorSwatch.round {
+  width: 32px;
+  height: 32px;
+}
+
+.colorSwatch.square {
+  width: 28px;
+  height: 28px;
+}
+
+.disabled {
+  opacity: var(--opacity-30);
+}
+
+.color {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  border: 3px solid #fff;
+  pointer-events: none;
+}
+
+.round .color {
+  border-radius: 100%;
+  box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.25);
+}
+
+.square .color {
+  border-radius: 6px;
+}
+
+.colorFill {
+  flex-grow: 1;
+}
+
+.hexColorSelector {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+}
+
+.hexColorSelector:hover ~ .color {
+  opacity: 0.9;
+}
+
+.hexColorSelector:focus ~ .color {
+  border-color: var(--color-blue);
+}
+
+.disabled .hexColorSelector {
+  cursor: not-allowed;
+}
+
+.input::-webkit-inner-spin-button,
+.input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
