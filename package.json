@@ -15,8 +15,8 @@
     "zustand": "^3.6.9"
   },
   "devDependencies": {
-    "@create-figma-plugin/build": "^1.8.2",
-    "@create-figma-plugin/tsconfig": "^1.8.2",
+    "@create-figma-plugin/build": "^2.6.1",
+    "@create-figma-plugin/tsconfig": "^2.6.1",
     "@figma/plugin-typings": "1.40.0",
     "@types/react": "^17.0.38",
     "react": "^17.0.2",
@@ -40,6 +40,11 @@
         "main": "src/main.ts",
         "ui": "src/ui.tsx"
       }
+    },
+    "networkAccess": {
+      "allowedDomains": [
+        "none"
+      ]
     }
   },
   "stylelint": {
