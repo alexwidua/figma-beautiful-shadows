@@ -98,38 +98,11 @@ const Plugin = () => {
   const handleSelectionChange = useCallback((selection: Selection) => {
     setSelection(selection);
 
-    // const { derivedBackgroundColor } = selection;
-    // setShadowColorAndBackground(derivedBackgroundColor);
-
     const { prevShadowEffects } = selection;
     if (prevShadowEffects) {
       restorePrevEffectsAndSettings(prevShadowEffects);
     }
   }, []);
-
-  //   const setShadowColorAndBackground = useCallback((derivedBackgroundColor: RGBA | undefined) => {
-  //     let shadowColor = SHADOW_DEFAULT_COLOR;
-  //     let backgroundColor = BACKGROUND_DEFAULT_COLOR;
-  //     if (derivedBackgroundColor) {
-  //       const { r, g, b, a } = derivedBackgroundColor;
-  //       const toHex = chroma.gl(r, g, b, a).hex();
-  //       // tint shadow based on bg color
-  //       let hsl: any = chroma(toHex).hsl();
-  //       // check if color has hue (ex. no white, grey, black)
-  //       if (isNaN(hsl[0])) {
-  //         hsl = [0, 0, 0];
-  //       } else {
-  //         hsl[2] = clamp(hsl[2] - 0.8, 0.1, 1); // decrease lightness
-  //       }
-  //       const color = chroma.hsl(hsl[0], hsl[1], hsl[2]).hex();
-  //       shadowColor = color.replace("#", "");
-  //       backgroundColor = toHex;
-  //     }
-  //     setColor(shadowColor);
-  //     setPreview({
-  //       backgroundColor,
-  //     });
-  //   }, []);
 
   function handleShadowColorChange(newColor: string) {
     setColor(newColor);

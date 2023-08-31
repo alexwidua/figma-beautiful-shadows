@@ -2,7 +2,7 @@ import { on, once, emit, showUI } from "@create-figma-plugin/utilities";
 import { validateSelection, SelectionState } from "./utils/selection";
 import { getCastedShadows } from "./utils/shadow";
 import { hexToGL } from "./utils/color";
-import { searchForEnclosingNode, isSymbol } from "./utils/node";
+import { isSymbol } from "./utils/node";
 import { WINDOW_INITIAL_WIDTH, WINDOW_INITIAL_HEIGHT } from "./constants";
 
 // Types
@@ -108,38 +108,11 @@ export default function () {
       width: nodeRef?.width || 0,
       height: nodeRef?.height || 0,
       cornerRadius: !isSymbol(nodeRef?.cornerRadius) ? nodeRef?.cornerRadius : 0,
-      // TODO: Disabled because it caused problems with new introduced node types, should fix this soon.
-      //
-      // derivedBackgroundColor: tryToDeriveBGColorFromCanvas(
-      // 	state !== 'VALID'
-      // ),
-      derivedBackgroundColor: undefined,
       prevShadowEffects: checkIfExistingShadowData(),
     };
 
     emit("SELECTION_CHANGE", data);
   }
-
-  /**
-   * Try to 'derive' a background color by searching for a node that encloses the selected node.
-   */
-  // TODO // Note 20230507: Removed for now because it causes issues with some node types. Need to look into this when more time...
-  // function tryToDeriveBGColorFromCanvas(skip: boolean): RGBA | undefined {
-  //   if (nodeRef?.removed) return;
-  //   if (!nodeRef) return;
-  //   if (skip) {
-  //     return undefined;
-  //   } else {
-  //     const hasOverlappingNode = searchForEnclosingNode(figma.currentPage, nodeRef);
-  //     if (hasOverlappingNode) {
-  //       const fill = hasOverlappingNode.fills[hasOverlappingNode.fills.length - 1];
-
-  //       if (!fill || !fill.color || !fill.opacity) return undefined;
-  //       const { color, opacity } = fill;
-  //       return { r: color.r, g: color.g, b: color.b, a: opacity };
-  //     }
-  //   }
-  // }
 
   /**
    * Draw shadows ☀️
