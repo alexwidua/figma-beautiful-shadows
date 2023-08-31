@@ -121,14 +121,14 @@ const Plugin = () => {
         onHexColorInput={handleBgColorChange}
         opacity={"100%"}
         type="square"
-        style={{ transform: "translate(18px, -2px)" }}
+        style={{ transform: "translate(28px, -2px)" }}
       />
       <ColorInput
         hexColor={color}
         onHexColorInput={handleShadowColorChange}
         opacity={"100%"}
         type="round"
-        style={{ transform: "translate(-8px, 0px)" }}
+        style={{ transform: "translate(-0px, 0px)" }}
       />
       <Menu bounds={bounds} />
     </PreviewEditor>

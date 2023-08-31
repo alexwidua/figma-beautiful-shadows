@@ -1,29 +1,29 @@
 .panel {
-	position: absolute;
-	z-index: 99999;
-	right: 0;
-	bottom: 0;
-	width: auto;
-	height: auto;
-	background: var(--color-white);
-	border-radius: var(--border-radius-2);
-	box-shadow: var(--box-shadow-modal);
-	opacity: 0;
-	pointer-events: none;
-	touch-action: none;
-	visibility: hidden;
+  position: absolute;
+  z-index: 99999;
+  right: 0;
+  bottom: 0;
+  width: auto;
+  height: auto;
+  background: var(--color-white);
+  border-radius: var(--border-radius-2);
+  box-shadow: var(--box-shadow-modal);
+  opacity: 0;
+  pointer-events: none;
+  touch-action: none;
+  visibility: hidden;
 }
 
 .panel.open {
-	opacity: 1;
-	pointer-events: all;
-	visibility: visible;
+  opacity: 1;
+  pointer-events: all;
+  visibility: visible;
 }
 
 .titlebar {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	padding: 8px 4px 8px var(--space-small);
-	border-bottom: 1px solid var(--color-black-6-translucent);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 4px 4px 5px;
+  border-bottom: 1px solid var(--color-black-6-translucent);
 }

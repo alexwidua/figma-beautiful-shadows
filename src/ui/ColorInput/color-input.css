@@ -6,13 +6,13 @@
 }
 
 .colorSwatch.round {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
 }
 
 .colorSwatch.square {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
 }
 
 .disabled {
@@ -27,7 +27,7 @@
   overflow: hidden;
   width: 100%;
   height: 100%;
-  border: 3px solid #fff;
+  border: 2px solid #fff;
   pointer-events: none;
 }
 
