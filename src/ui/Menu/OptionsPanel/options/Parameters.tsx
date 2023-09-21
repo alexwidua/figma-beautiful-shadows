@@ -1,7 +1,7 @@
 import { h, JSX } from "preact";
 import useStore from "../../../../store/useStore";
 import { useState, useEffect } from "preact/hooks";
-import { percent, clamp, deriveXYFromAngle } from "../../../../utils/math";
+import { percent, clamp, deriveXYFromAngle, degreeToRadian } from "../../../../utils/math";
 import { TextboxNumeric } from "@create-figma-plugin/ui";
 import styles from "./parameters.css";
 
@@ -53,17 +53,21 @@ const Parameters = () => {
   const [tempDistance, setTempDistance] = useState<string>("0");
   const validateDistance = (value: null | number) => {
     if (value === null) return null;
+    // TODO: Bounds math still not perfect...
     const { width, height } = previewBounds;
-    const boundsDiagonal = Math.sqrt(width * width + height * height);
-    const constraint = boundsDiagonal / 2 - lightSize / 2;
-    const valid = value >= 0 && value <= constraint;
+    const boundsX = width / 2;
+    const boundsY = height / 2;
+    const delta = degreeToRadian(azimuth);
+    const cos = Math.cos(delta); //x
+    const sin = Math.sin(delta); //u
+    const bounds = Math.sqrt(Math.abs(boundsX * boundsX * cos) + Math.abs(boundsY * boundsY * sin)) - lightSize / 2;
 
-    if (valid) {
-      const data: Pick<Preview, "distance"> = { distance: value };
-      setPreview(data);
-    }
+    const valid = value >= 0 && value <= bounds;
+    const data: Pick<Preview, "distance"> = { distance: valid ? value : bounds };
+    setPreview(data);
     return valid;
   };
+
   useEffect(() => {
     setTempDistance(Math.round(distance).toString());
   }, [distance]);
