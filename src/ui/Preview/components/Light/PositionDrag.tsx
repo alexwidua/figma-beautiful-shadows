@@ -83,7 +83,6 @@ const PositionDrag = ({ children, style, ...rest }: { style?: any; children: any
 
   useEffect(() => {
     if (positionPointerDown) return;
-    console.log(azimuth);
     const { dx, dy } = deriveXYFromAngle(azimuth, distance);
     const adjustedX = previewBounds.width / 2 - size / 2 - dx;
     const adjustedY = previewBounds.height / 2 - size / 2 - dy;
