@@ -83,7 +83,9 @@ const PositionDrag = ({ children, style, ...rest }: { style?: any; children: any
 
   useEffect(() => {
     if (positionPointerDown) return;
-    const { dx, dy } = deriveXYFromAngle(azimuth, distance);
+    let __distance = distance;
+    if (__distance == 0) __distance = 0.1; // TODO: Refactor this fix. Prevents azimuth from resetting when distance is manually set to 0.
+    const { dx, dy } = deriveXYFromAngle(azimuth, __distance);
     const adjustedX = previewBounds.width / 2 - size / 2 - dx;
     const adjustedY = previewBounds.height / 2 - size / 2 - dy;
     animateLightPosition.start({
