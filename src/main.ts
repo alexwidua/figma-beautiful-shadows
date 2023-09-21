@@ -10,7 +10,7 @@ import { Preview } from "./store/createPreview";
 import { Selection } from "./store/createSelection";
 import { PreviewBounds } from "./hooks/usePreviewBounds";
 
-const VERSION = 15;
+const VERSION = 16;
 const PLUGIN_DATA_KEY = "beautiful_shadow";
 const VALID_NODE_TYPES: Array<NodeType> = [
   "BOOLEAN_OPERATION",
