@@ -16,11 +16,9 @@ const Options = ({ bounds, anchor, open, onClose }: any) => {
       anchorAlign="RIGHT"
       anchorMargin={0}
     >
-      <Container space={"small"} style={{ width: 196 }}>
+      <Container space={"small"} style={{ width: 224 }}>
         <VerticalSpace space={"small"} />
-        <div className={styles.row}>
-          <Parameters />
-        </div>
+        <Parameters />
         <VerticalSpace space={"small"} />
       </Container>
     </Panel>

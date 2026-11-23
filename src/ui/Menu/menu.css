@@ -7,3 +7,16 @@
   border-radius: 8px;
   box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.05);
 }
+
+.menu button {
+  background-color: #18a0fb !important;
+  color: #ffffff !important;
+  font-weight: 500 !important;
+}
+
+.menu button:disabled,
+.menu [class*="disabled"] button {
+  background-color: #18a0fb !important;
+  opacity: 0.45 !important;
+  cursor: not-allowed !important;
+}

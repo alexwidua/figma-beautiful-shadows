@@ -1,19 +1,99 @@
 import { h, JSX } from "preact";
 import useStore from "../../../../store/useStore";
 import { useState, useEffect } from "preact/hooks";
-import { percent, clamp, deriveXYFromAngle, degreeToRadian } from "../../../../utils/math";
-import { TextboxNumeric } from "@create-figma-plugin/ui";
+import { clamp, deriveXYFromAngle, degreeToRadian } from "../../../../utils/math";
 import styles from "./parameters.css";
 
-// Types
-import { Preview } from "../../../../store/createPreview";
-import { Light } from "../../../../store/createLight";
-import { Target } from "../../../../store/createTarget";
+interface SliderGroupProps {
+  icon: JSX.Element;
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step?: number;
+  unit?: string;
+  onChange: (val: number) => void;
+}
+
+const SliderGroup = ({
+  icon,
+  label,
+  value,
+  min,
+  max,
+  step = 1,
+  unit = "",
+  onChange,
+}: SliderGroupProps) => {
+  const [textValue, setTextValue] = useState<string>(`${Math.round(value)}${unit}`);
+
+  useEffect(() => {
+    setTextValue(`${Math.round(value)}${unit}`);
+  }, [value, unit]);
+
+  const handleInput = (e: JSX.TargetedEvent<HTMLInputElement>) => {
+    const val = Number(e.currentTarget.value);
+    onChange(val);
+  };
+
+  const handleTextChange = (e: JSX.TargetedEvent<HTMLInputElement>) => {
+    setTextValue(e.currentTarget.value);
+  };
+
+  const handleTextBlur = () => {
+    const parsed = parseFloat(textValue.replace(/[^0-9.-]/g, ""));
+    if (!isNaN(parsed)) {
+      const clamped = clamp(parsed, min, max);
+      onChange(clamped);
+      setTextValue(`${Math.round(clamped)}${unit}`);
+    } else {
+      setTextValue(`${Math.round(value)}${unit}`);
+    }
+  };
+
+  const handleTextKeyDown = (e: JSX.TargetedKeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.currentTarget.blur();
+    }
+  };
+
+  const percentFilled = max > min ? Math.min(Math.max(((value - min) / (max - min)) * 100, 0), 100) : 0;
+
+  return (
+    <div className={styles.sliderGroup}>
+      <div className={styles.headerRow}>
+        <div className={styles.labelWrapper}>
+          <span className={styles.icon}>{icon}</span>
+          <span className={styles.labelText}>{label}</span>
+        </div>
+        <input
+          type="text"
+          className={styles.valueInput}
+          value={textValue}
+          onInput={handleTextChange}
+          onBlur={handleTextBlur}
+          onKeyDown={handleTextKeyDown}
+        />
+      </div>
+      <div className={styles.sliderTrackWrapper}>
+        <input
+          type="range"
+          className={styles.sliderInput}
+          min={min}
+          max={max}
+          step={step}
+          value={value}
+          onInput={handleInput}
+          style={{
+            background: `linear-gradient(to right, #18a0fb 0%, #18a0fb ${percentFilled}%, #e5e5e5 ${percentFilled}%, #e5e5e5 100%)`,
+          }}
+        />
+      </div>
+    </div>
+  );
+};
 
 const Parameters = () => {
-  /**
-   * 💾 Store
-   */
   const { previewBounds, lightSize, azimuth, distance, brightness, elevation, setPreview, setLight, setTarget } =
     useStore((state) => ({
       previewBounds: state.previewBounds,
@@ -27,131 +107,77 @@ const Parameters = () => {
       setTarget: state.setTarget,
     }));
 
-  /**
-   * 📐 Azimuth
-   */
-  const [tempAzimuth, setTempAzimuth] = useState<string>("0°");
-  const validateAzimuth = (value: null | number) => {
-    if (value === null) return null;
-    const valid = value >= 0 && value <= 360;
-    if (valid) {
-      const { dx, dy } = deriveXYFromAngle(value, distance);
-      const adjustedX = previewBounds.width / 2 - lightSize / 2 - dx;
-      const adjustedY = previewBounds.height / 2 - lightSize / 2 - dy;
-      const data: Pick<Light, "x" | "y"> = { x: adjustedX, y: adjustedY };
-      setLight(data);
-    }
-    return valid;
-  };
-  useEffect(() => {
-    setTempAzimuth(Math.round(azimuth) + "°");
-  }, [azimuth]);
+  const { width, height } = previewBounds;
+  const boundsX = width > 0 ? width / 2 : 150;
+  const boundsY = height > 0 ? height / 2 : 150;
+  const delta = degreeToRadian(azimuth);
+  const cos = Math.cos(delta);
+  const sin = Math.sin(delta);
+  const calculatedBounds = Math.sqrt(Math.abs(boundsX * boundsX * cos) + Math.abs(boundsY * boundsY * sin)) - lightSize / 2;
+  const maxDistance = Math.max(Math.round(calculatedBounds), 200);
 
-  /**
-   * 📏 Distance
-   */
-  const [tempDistance, setTempDistance] = useState<string>("0");
-  const validateDistance = (value: null | number) => {
-    if (value === null) return null;
-    // TODO: Bounds math still not perfect...
-    const { width, height } = previewBounds;
-    const boundsX = width / 2;
-    const boundsY = height / 2;
-    const delta = degreeToRadian(azimuth);
-    const cos = Math.cos(delta); //x
-    const sin = Math.sin(delta); //u
-    const bounds = Math.sqrt(Math.abs(boundsX * boundsX * cos) + Math.abs(boundsY * boundsY * sin)) - lightSize / 2;
-
-    const valid = value >= 0 && value <= bounds;
-    const data: Pick<Preview, "distance"> = { distance: valid ? value : bounds };
-    setPreview(data);
-    return valid;
+  const handleBrightnessChange = (val: number) => {
+    setLight({ brightness: val / 100 });
   };
 
-  useEffect(() => {
-    setTempDistance(Math.round(distance).toString());
-  }, [distance]);
-
-  /**
-   * ☀️ Brightness
-   */
-  const [tempBrightness, setTempBrightness] = useState<string>("0");
-  const validateBrightness = (value: null | number) => {
-    if (value === null) return null;
-    const valid = value >= 0 && value <= 100;
-    if (valid) {
-      const data: Pick<Light, "brightness"> = { brightness: value / 100 }; // normalize value back to 0..1
-      setLight(data);
-    }
-    return valid;
+  const handleElevationChange = (val: number) => {
+    setTarget({ elevation: val / 100 });
   };
-  useEffect(() => {
-    setTempBrightness(percent(brightness) + "%");
-  }, [brightness]);
 
-  /**
-   * ⛰️ Elevation
-   */
-  const [tempElevation, setTempElevation] = useState<string>("0");
-  const validateElevation = (value: null | number) => {
-    if (value === null) return null;
-    const valid = value >= 0 && value <= 100;
-    if (valid) {
-      const data: Pick<Target, "elevation"> = { elevation: value / 100 }; // normalize value back to 0..1
-      setTarget(data);
-    }
-    return valid;
+  const handleDistanceChange = (val: number) => {
+    setPreview({ distance: val });
   };
-  useEffect(() => {
-    setTempElevation(clamp(percent(elevation), 0, 100) + "%");
-  }, [elevation]);
+
+  const handleAzimuthChange = (val: number) => {
+    const { dx, dy } = deriveXYFromAngle(val, distance);
+    const adjustedX = previewBounds.width / 2 - lightSize / 2 - dx;
+    const adjustedY = previewBounds.height / 2 - lightSize / 2 - dy;
+    setLight({ x: adjustedX, y: adjustedY });
+  };
 
   return (
     <div className={styles.parameters}>
-      <TextboxNumeric
-        name={"azimuth"}
-        icon={"A"}
-        onInput={(e: JSX.TargetedEvent<HTMLInputElement>) => setTempAzimuth(e.currentTarget.value)}
-        value={tempAzimuth}
-        suffix={"°"}
-        validateOnBlur={validateAzimuth}
-        noBorder
-      />
-      <TextboxNumeric
-        name={"distance"}
-        icon={"D"}
-        onInput={(e: JSX.TargetedEvent<HTMLInputElement>) => setTempDistance(e.currentTarget.value)}
-        value={tempDistance}
-        validateOnBlur={validateDistance}
-        noBorder
-      />
-      <TextboxNumeric
-        name={"brightness"}
+      <SliderGroup
         icon={<IconBrightness16 v={1 - brightness} />}
-        onInput={(e: JSX.TargetedEvent<HTMLInputElement>) => setTempBrightness(e.currentTarget.value)}
-        value={tempBrightness}
-        suffix={"%"}
-        validateOnBlur={validateBrightness}
-        noBorder
+        label={"Helligkeit"}
+        value={Math.round(brightness * 100)}
+        min={0}
+        max={100}
+        unit={"%"}
+        onChange={handleBrightnessChange}
       />
-      <TextboxNumeric
-        name={"elevation"}
+      <SliderGroup
         icon={<IconElevation16 v={3 - Math.round(elevation * 3)} />}
-        onInput={(e: JSX.TargetedEvent<HTMLInputElement>) => setTempElevation(e.currentTarget.value)}
-        value={tempElevation}
-        suffix={"%"}
-        validateOnBlur={validateElevation}
-        noBorder
+        label={"Höhe"}
+        value={Math.round(elevation * 100)}
+        min={0}
+        max={100}
+        unit={"%"}
+        onChange={handleElevationChange}
+      />
+      <SliderGroup
+        icon={<IconDistance16 />}
+        label={"Abstand"}
+        value={Math.round(distance)}
+        min={0}
+        max={maxDistance}
+        unit={"px"}
+        onChange={handleDistanceChange}
+      />
+      <SliderGroup
+        icon={<IconAzimuth16 />}
+        label={"Winkel"}
+        value={Math.round(azimuth)}
+        min={0}
+        max={360}
+        unit={"°"}
+        onChange={handleAzimuthChange}
       />
     </div>
   );
 };
 
-/**
- * Icons
- */
-const IconBrightness16 = ({ v = 0 }) => {
-  const inc = Math.cos(v);
+const IconBrightness16 = ({ v = 0 }: { v?: number }) => {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
@@ -172,11 +198,29 @@ const IconBrightness16 = ({ v = 0 }) => {
   );
 };
 
-const IconElevation16 = ({ v = 0 }) => {
+const IconElevation16 = ({ v = 0 }: { v?: number }) => {
   return (
     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M8 7L15 11L8 15L1 11L8 7Z" fill="currentColor" style={{ opacity: 0.8 }} />
       <path d={`M2 ${v + 6}L8 ${v + 2}.5L14 ${v + 6}L8 ${v + 9}.5L2 ${v + 6}Z`} fill="white" stroke="currentColor" />
+    </svg>
+  );
+};
+
+const IconDistance16 = () => {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M2.5 8H13.5M2.5 8L5 5.5M2.5 8L5 10.5M13.5 8L11 5.5M13.5 8L11 10.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+};
+
+const IconAzimuth16 = () => {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="8" cy="8" r="5.5" stroke="currentColor" strokeWidth="1.2" strokeDasharray="1.5 1.5"/>
+      <path d="M8 8L11.5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="8" cy="8" r="1.5" fill="currentColor"/>
     </svg>
   );
 };

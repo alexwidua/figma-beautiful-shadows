@@ -1,5 +1,112 @@
 .parameters {
-	display: grid;
-	grid-gap: 4px;
-	grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.sliderGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.labelWrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-black-80, #333333);
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  color: currentColor;
+}
+
+.labelText {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 16px;
+  color: var(--color-black-80, #333333);
+  letter-spacing: -0.1px;
+}
+
+.valueInput {
+  width: 48px;
+  height: 20px;
+  padding: 0 4px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-black-80, #333333);
+  font-size: 11px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  outline: none;
+  cursor: text;
+  transition: all 0.15s ease;
+}
+
+.valueInput:hover {
+  background: var(--color-black-6-translucent, rgba(0, 0, 0, 0.05));
+}
+
+.valueInput:focus {
+  background: #ffffff;
+  border-color: var(--color-accent, #18a0fb);
+  box-shadow: 0 0 0 1px var(--color-accent, #18a0fb);
+  color: #000000;
+}
+
+.sliderTrackWrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 16px;
+}
+
+.sliderInput {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  margin: 0;
+  padding: 0;
+  transition: background 0.05s ease;
+}
+
+.sliderInput::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.sliderInput:hover::-webkit-slider-thumb {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3), 0 0 0 2px var(--color-accent, #18a0fb);
+}
+
+.sliderInput:active::-webkit-slider-thumb {
+  transform: scale(1.15);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.35), 0 0 0 2.5px var(--color-accent, #18a0fb);
 }

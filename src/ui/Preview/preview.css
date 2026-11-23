@@ -1,3 +1,11 @@
+:root,
+.theme-slides,
+.theme-figma,
+.theme-figjam {
+  --color-accent: #18a0fb;
+  --color-blue: #18a0fb;
+}
+
 .preview {
   position: relative;
   overflow: hidden;
