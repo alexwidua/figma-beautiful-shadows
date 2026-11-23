@@ -25,6 +25,9 @@ const VALID_NODE_TYPES: Array<NodeType> = [
   "STAR",
   "TEXT",
   "VECTOR",
+  "SLIDE",
+  "SHAPE_WITH_TEXT",
+  "STICKY",
 ];
 
 export interface PluginData extends Preview {
@@ -107,7 +110,7 @@ export default function () {
       type: nodeRef?.type || undefined,
       width: nodeRef?.width || 0,
       height: nodeRef?.height || 0,
-      cornerRadius: !isSymbol(nodeRef?.cornerRadius) ? nodeRef?.cornerRadius : 0,
+      cornerRadius: !isSymbol(nodeRef?.cornerRadius) ? (nodeRef?.cornerRadius || 0) : 0,
       prevShadowEffects: checkIfExistingShadowData(),
     };
 
