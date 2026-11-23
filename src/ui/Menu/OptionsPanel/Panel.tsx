@@ -66,7 +66,16 @@ export function Panel({
 
 	const [{ x, y }, animate] = useSpring(() => ({ x: 0, y: 0 }))
 	const drag = useDrag(
-		({ offset: [ox, oy] }) => {
+		({ event, offset: [ox, oy], cancel }) => {
+			const target = event?.target as HTMLElement | null
+			if (
+				target &&
+				target.closest &&
+				target.closest('input, button, select, textarea, [data-no-drag], [class*="slider"]')
+			) {
+				cancel()
+				return
+			}
 			animate.set({ x: ox, y: oy })
 		},
 		{
@@ -123,7 +132,13 @@ export function Panel({
 					<IconCross32 />
 				</IconButton>
 			</div>
-			{children}
+			<div
+				data-no-drag
+				onPointerDown={(e) => e.stopPropagation()}
+				onMouseDown={(e) => e.stopPropagation()}
+				onTouchStart={(e) => e.stopPropagation()}>
+				{children}
+			</div>
 		</animated.div>
 	)
 }

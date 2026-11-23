@@ -60,7 +60,12 @@ const SliderGroup = ({
   const percentFilled = max > min ? Math.min(Math.max(((value - min) / (max - min)) * 100, 0), 100) : 0;
 
   return (
-    <div className={styles.sliderGroup}>
+    <div
+      className={styles.sliderGroup}
+      data-no-drag
+      onPointerDown={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
       <div className={styles.headerRow}>
         <div className={styles.labelWrapper}>
           <span className={styles.icon}>{icon}</span>
@@ -73,9 +78,16 @@ const SliderGroup = ({
           onInput={handleTextChange}
           onBlur={handleTextBlur}
           onKeyDown={handleTextKeyDown}
+          onPointerDown={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
         />
       </div>
-      <div className={styles.sliderTrackWrapper}>
+      <div
+        className={styles.sliderTrackWrapper}
+        onPointerDown={(e) => e.stopPropagation()}
+        onMouseDown={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+      >
         <input
           type="range"
           className={styles.sliderInput}
@@ -84,6 +96,9 @@ const SliderGroup = ({
           step={step}
           value={value}
           onInput={handleInput}
+          onPointerDown={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
           style={{
             background: `linear-gradient(to right, #18a0fb 0%, #18a0fb ${percentFilled}%, #e5e5e5 ${percentFilled}%, #e5e5e5 100%)`,
           }}
@@ -136,7 +151,12 @@ const Parameters = () => {
   };
 
   return (
-    <div className={styles.parameters}>
+    <div
+      className={styles.parameters}
+      data-no-drag
+      onPointerDown={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
       <SliderGroup
         icon={<IconBrightness16 v={1 - brightness} />}
         label={"Helligkeit"}
